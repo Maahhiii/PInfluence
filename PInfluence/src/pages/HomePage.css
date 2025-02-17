@@ -1,0 +1,25 @@
+/* Base styles for columns */
+.pins-grid {
+    column-count: 2;
+    column-gap: 16px;
+  }
+  
+  /* Media Queries */
+  @media (min-width: 600px) {
+    .pins-grid {
+      column-count: 3;
+    }
+  }
+  
+  @media (min-width: 1000px) {
+    .pins-grid {
+      column-count: 4;
+    }
+  }
+  
+  @media (min-width: 1200px) {
+    .pins-grid {
+      column-count: 5;
+    }
+  }
+  
