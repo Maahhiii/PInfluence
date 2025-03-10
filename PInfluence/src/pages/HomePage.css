@@ -1,73 +1,37 @@
 /* HomePage.css */
 
-/* Navbar styles */
+/* Navbar */
 .navbar {
+  background-color: white;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  padding: 1rem;
+  position: sticky;
   top: 0;
   z-index: 50;
 }
 
-/* Navbar input */
-.navbar input {
-  padding: 0.5rem;
-  width: 50%;
-  border-radius: 0.5rem;
-  border: 1px solid #ccc;
-  outline: none;
+/* Grid Container: Create a responsive grid */
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); /* Columns based on available space */
+  gap: 16px; /* Spacing between items */
+  padding: 16px;
 }
 
-/* Pins Grid (Masonry Layout using Columns) */
-.pins-grid {
-  padding: 1rem;
-  column-count: 2; /* 2 columns on small screens */
-  column-gap: 1.5rem; /* Space between columns */
+/* Grid Item: To make sure image doesn't break across rows */
+.grid-item {
+  break-inside: avoid; /* Prevents images from breaking */
 }
 
-/* Image Container */
-.image-container {
-  background-color: white;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  border-radius: 0.5rem;
-  overflow: hidden;
-  margin-bottom: 1.5rem;
-  transition: all 0.3s ease;
-  break-inside: avoid; /* Prevents images from breaking between columns */
+/* Image Styling */
+.grid-item img {
+  width: 100%; /* Make sure image takes up available width */
+  border-radius: 12px; /* Rounded corners */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Shadow effect */
+  transition: transform 0.3s ease; /* Smooth hover effect */
 }
 
 /* Hover Effect */
-.image-container:hover {
-  transform: scale(1.05);
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
-}
-
-/* Image styles */
-.image-container img {
-  width: 100%; /* Fill the container's width */
-  height: auto; /* Keep aspect ratio */
-  object-fit: cover; /* Ensures the image covers the space without stretching */
-  border-radius: 0.5rem;
-}
-
-/* Responsive Design */
-@media (min-width: 600px) {
-  .navbar input {
-    width: 33%;
-  }
-
-  .pins-grid {
-    column-count: 3; /* 3 columns on medium screens */
-  }
-}
-
-@media (min-width: 1000px) {
-  .pins-grid {
-    column-count: 4; /* 4 columns on larger screens */
-  }
-}
-
-@media (min-width: 1200px) {
-  .pins-grid {
-    column-count: 5; /* 5 columns on extra-large screens */
-  }
+.grid-item img:hover {
+  transform: scale(1.05); /* Slightly enlarge image */
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2); /* Larger shadow on hover */
 }

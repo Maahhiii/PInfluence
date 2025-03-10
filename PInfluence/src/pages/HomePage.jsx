@@ -4,9 +4,8 @@ import "./HomePage.css"; // Import the CSS file
 const HomePage = () => {
   return (
     <div className="min-h-screen bg-gray-100">
-
       {/* Navbar */}
-      <nav className="navbar flex justify-between items-center max-w-full px-4">
+      <nav className="navbar flex justify-between items-center px-4 py-3 bg-white shadow-md">
         <h1 className="text-2xl font-bold text-gray-800">PInfluence</h1>
 
         {/* Search Bar */}
@@ -17,18 +16,16 @@ const HomePage = () => {
             className="border p-2 w-full rounded-lg focus:outline-none"
           />
         </div>
-
-       
       </nav>
 
-      {/* Pins Grid */}
-      <div className="pins-grid">
+      {/* Proper Pinterest-like Grid */}
+      <div className="grid-container">
         {[...Array(20)].map((_, index) => (
-          <div key={index} className="image-container">
+          <div key={index} className="grid-item">
             <img
-              src={`https://picsum.photos/300?random=${index}`}
+              src={`https://picsum.photos/seed/${index}/300/${200 + (index % 3) * 50}`}
               alt="Pin"
-              className="w-full h-60 object-cover rounded-lg"
+              className="rounded-lg hover:scale-105 transition-transform duration-300 w-full"
             />
           </div>
         ))}
