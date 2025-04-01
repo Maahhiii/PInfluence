@@ -1,0 +1,64 @@
+/* src/Grid.css */
+.masonry-grid {
+    display: flex;
+    margin-left: -15px; /* Adjust gap between columns */
+    width: auto;
+  }
+  
+  .masonry-grid_column {
+    padding-left: 15px; /* Adjust gap between columns */
+  }
+  
+  .card {
+    position: relative; /* Make the card a positioned element for overlay positioning */
+    border-radius: 10px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 15px;
+    overflow: hidden; /* Ensure content stays within the card's rounded corners */
+  }
+  
+  .card img {
+    width: 100%;
+    border-radius: 10px;
+    transition: transform 0.3s ease, opacity 0.3s ease; /* Smooth transition for hover effects */
+  }
+  
+  .card:hover img {
+    transform: scale(1.05); /* Slightly enlarge the image on hover */
+    opacity: 0.7; /* Reduce opacity to create a blur-like effect */
+  }
+  
+  /* Save Pin button styling */
+  .card .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0); /* Transparent background initially */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0; /* Initially hidden */
+    transition: opacity 0.3s ease, background-color 0.3s ease; /* Smooth transition for hover effects */
+  }
+  
+  .card:hover .overlay {
+    background-color: rgba(255, 192, 203, 0.2); /* Light pink overlay on hover */
+    opacity: 1; /* Show overlay on hover */
+  }
+  
+  .card .overlay button {
+    background-color: #ff69b4; /* Light pink button color */
+    color: white; /* Button text color */
+    border: none;
+    border-radius: 20px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  
+  .card .overlay button:hover {
+    background-color: #ff1493; /* Darker pink on button hover */
+  }
+  
