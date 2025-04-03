@@ -1,21 +1,36 @@
-import React from 'react';
-import './Navbar.css';
+import { useState, useEffect } from "react";
+import "./Navbar.css"; 
 
-function Navbar() {
+export default function Navbar() {
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
   return (
-    <nav className="navbar">
-      <div className="navbar-left">
-        <img src="/images/logo.png" alt="Logo" className="navbar-logo" />
-        <span className="navbar-brand">PInfluence</span>
-      </div>
-      <div className="navbar-right">
-        <input type="text" placeholder="Search..." className="navbar-search" />
-        <button className="navbar-button">Home</button>
-        <button className="navbar-button">Profile</button>
-        <button className="navbar-button">Settings</button>
+    <nav className={`navbar ${isScrolled ? "scrolled" : ""}`}>
+      <div className="nav-container">
+        {/* Left side: Logo and Brand Name */}
+        <div className="logo">
+          <img src="/PInfluence-logo.png" alt="PInfluence Logo" className="logo-img" />
+          <span className="brand-name">PInfluence</span>
+        </div>
+
+        {/* Right side: Sign In & Log In Buttons */}
+        <div className="right-container">
+          <button className="btn sign-in">Sign Up</button>
+          <button className="btn log-in">Log In</button>
+        </div>
       </div>
     </nav>
   );
 }
-
-export default Navbar;
