@@ -1,84 +1,132 @@
-/* src/Modal.css */
 .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.7);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    backdrop-filter: blur(5px);
-  }
-  
-  .modal-content {
-    background-color: black;
-    border-radius: 8px;
-    width: 90%;
-    max-width: 800px;
-    max-height: 90vh;
-    overflow: hidden;
-    position: relative;
-    color: white;
-  }
-  
-  .modal-close {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    background-color: rgba(0, 0, 0, 0.5);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    font-size: 20px;
-    cursor: pointer;
-    z-index: 10;
-  }
-  
-  .modal-image-container {
-    position: relative;
-  }
-  
-  .modal-image {
-    width: 100%;
-    max-height: 70vh;
-    object-fit: contain;
-  }
-  
-  .modal-info {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    padding: 20px;
-    background: linear-gradient(transparent, rgba(0, 0, 0, 0.8) 30%, black);
-  }
-  
-  .modal-title {
-    font-size: 24px;
-    margin-bottom: 10px;
-  }
-  
-  .modal-brand {
-    margin-bottom: 15px;
-    color: #ccc;
-  }
-  
-  .shop-button {
-    display: inline-block;
-    background-color: #e60023;
-    color: white;
-    padding: 10px 16px;
-    border-radius: 4px;
-    text-decoration: none;
-    font-weight: bold;
-  }
-  
-  .shop-button:hover {
-    background-color: #d50c22;
-  }
-  
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(10px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  position: relative;
+  width: 90%;
+  max-width: 800px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #FC9CE3, #FFD5C2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+.modal-close {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  font-size: 28px;
+  background: transparent;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.modal-image-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.modal-image {
+  width: 100%;
+  max-height: 75vh;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.modal-image-container:hover .modal-image {
+  transform: scale(1.02);
+}
+
+.modal-image-container:hover::after {
+  content: "✨";
+  position: absolute;
+  top: 10%;
+  left: 10%;
+  font-size: 2rem;
+  color: #F9EF9F;
+  animation: sparkle 1s ease infinite alternate;
+}
+
+@keyframes sparkle {
+  0% { transform: scale(1) rotate(0deg); opacity: 0.8; }
+  100% { transform: scale(1.4) rotate(20deg); opacity: 0.2; }
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: space-around;
+  padding: 20px;
+  background-color: transparent;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.icon-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  font-weight: bold;
+  padding: 10px 18px;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  transition: all 0.3s ease;
+}
+
+.btn-save {
+  background-color: #FC9CE3;
+}
+.btn-save:hover {
+  background-color: #e68dcf;
+}
+
+.btn-send {
+  background-color: #AFA8F0;
+}
+.btn-send:hover {
+  background-color: #9790e2;
+}
+
+.btn-shop {
+  background-color: #FFD5C2;
+}
+.btn-shop:hover {
+  background-color: #e6c0b0;
+}
+
+.friends-popup {
+  display: flex;
+  justify-content: space-around;
+  padding: 15px;
+  border-top: 1px solid #eee;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.friend {
+  text-align: center;
+  color: white;
+  cursor: pointer;
+}
+
+.friend-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 999px;
+  margin-bottom: 6px;
+  object-fit: cover;
+  border: 2px solid white;
+}

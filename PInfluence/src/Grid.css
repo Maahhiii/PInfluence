@@ -1,8 +1,9 @@
 /* src/Grid.css */
 .masonry-grid {
     display: flex;
-    margin-left: -15px; /* Adjust gap between columns */
+    margin-left: -5px; /* Adjust gap between columns */
     width: auto;
+    margin-top: 15px;
   }
   
   .masonry-grid_column {

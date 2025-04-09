@@ -1,48 +1,86 @@
-// src/App.jsx
-import React, { useState, useEffect } from 'react';
-import Grid from './Grid';
-import Navbar from './Navbar';
-import './App.css';
+import React, { useState } from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useNavigate,
+  useLocation,
+} from "react-router-dom";
+import Grid from "./Grid";
+import Navbar from "./Navbar";
+import clothesWomenData from "./data/clothesWomen";
+import "./App.css";
+import Chatbox from "./Chatbox";
 
-function App() {
-  const [cards, setCards] = useState([]);
+function HomePage() {
+  return <Grid cards={clothesWomenData} />;
+}
 
-  useEffect(() => {
-    const fetchImages = () => {
-      // Add more product information
-      const images = [
-        { 
-          image: '/images/image1.jpg', 
-          title: 'Pink Oversized Coat',
-          brand: 'Fashion Nova',
-          shopLink: 'https://example.com/pink-coat'
-        },
-        { 
-          image: '/images/image2.jpg', 
-          title: 'White Knit Dress',
-          brand: 'Zara',
-          shopLink: 'https://example.com/white-dress'
-        },
-        { 
-          image: '/images/image3.jpg', 
-          title: 'Argyle Vest with Pants',
-          brand: 'H&M',
-          shopLink: 'https://example.com/argyle-outfit'
-        },
-      ];
-    
-      const repeatedImages = Array(20).fill(images).flat();
-      setCards(repeatedImages);
-    };
+function AppWrapper() {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isChatOpen, setIsChatOpen] = useState(false); // ✅ New state
+  const navigate = useNavigate();
+  const location = useLocation();
 
-    fetchImages();
-  }, []);
+  function AppWrapper() {
+    const [searchTerm, setSearchTerm] = useState("");
+    const [isChatOpen, setIsChatOpen] = useState(false); 
+    const navigate = useNavigate();
+    const location = useLocation();
+  
+    // ✅ Add this useEffect to control page scroll
+    useEffect(() => {
+      if (isChatOpen) {
+        document.body.classList.add("modal-open");
+      } else {
+        document.body.classList.remove("modal-open");
+      }
+    }, [isChatOpen]);
+  }
+
+  const handleSearch = (term) => {
+    setSearchTerm(term);
+    if (term.trim()) {
+      navigate("/search");
+    }
+  };
+
+  const handleChatClick = () => {
+    setIsChatOpen(true);
+  };
+
+  const closeChat = () => {
+    setIsChatOpen(false);
+  };
 
   return (
     <div className="App">
-      <Navbar />
-      <Grid cards={cards} />
+      {location.pathname !== "/search" && (
+        <Navbar onSearch={handleSearch} onChatClick={handleChatClick} />
+      )}
+
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/search" element={<SearchPage searchTerm={searchTerm} />} />
+      </Routes>
+
+      {/* ✅ Render Chatbox as modal */}
+      {isChatOpen && (
+        <div className="chatbox-overlay" onClick={closeChat}>
+          <div className="chatbox-modal" onClick={(e) => e.stopPropagation()}>
+            <Chatbox onClose={closeChat} />
+          </div>
+        </div>
+      )}
     </div>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <AppWrapper />
+    </Router>
   );
 }
 

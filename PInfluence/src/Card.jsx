@@ -9,14 +9,6 @@ function Card({ card, onClick }) {
     >
       <img src={card.image} alt={card.title} />
       <div className="overlay">
-        <button 
-          onClick={(e) => {
-            e.stopPropagation(); // Prevent triggering the card click
-            console.log('Save Pin clicked');
-          }}
-        >
-          Save Pin
-        </button>
       </div>
     </div>
   );
