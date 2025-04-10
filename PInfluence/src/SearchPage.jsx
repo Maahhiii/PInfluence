@@ -1,22 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, TextField, Typography, Button, Stack, Chip } from '@mui/material';
 import Slider from 'react-slick';
 import Grid from './Grid';
 import clothesWomenData from './data/clothesWomen';
+import clothesMenData from './data/clothesMen';
 import './SearchPage.css';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 
-const popularPins = clothesWomenData.slice(0, 6);
-
-const SearchPage = () => {
-  const [searchTerm, setSearchTerm] = useState('');
+const SearchPage = ({ searchTerm: initialSearchTerm = '', isMale }) => {
+  const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
   const [searchResults, setSearchResults] = useState([]);
   const [showCarousel, setShowCarousel] = useState(true);
   const [searchHistory, setSearchHistory] = useState([]);
 
+  const data = isMale ? clothesMenData : clothesWomenData;
+  const popularPins = data.slice(0, 6);
+
+  useEffect(() => {
+    if (initialSearchTerm.trim()) {
+      handleSearch();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialSearchTerm]);
+
   const handleSearch = () => {
-    const filtered = clothesWomenData.filter(card =>
+    const filtered = data.filter(card =>
       card.title.toLowerCase().includes(searchTerm.toLowerCase())
     );
     setSearchResults(filtered);
@@ -29,7 +38,7 @@ const SearchPage = () => {
 
   const handleChipClick = (term) => {
     setSearchTerm(term);
-    const filtered = clothesWomenData.filter(card =>
+    const filtered = data.filter(card =>
       card.title.toLowerCase().includes(term.toLowerCase())
     );
     setSearchResults(filtered);
@@ -84,25 +93,40 @@ const SearchPage = () => {
         </Box>
       </Box>
 
-      
+      {/* Search History */}
+      {searchHistory.length > 0 && (
+        <Stack direction="row" spacing={1} my={2} px={4} flexWrap="wrap">
+          <Typography variant="body1" sx={{ mr: 1 }}>Recent:</Typography>
+          {searchHistory.map((term, idx) => (
+            <Chip
+              key={idx}
+              label={term}
+              clickable
+              onClick={() => handleChipClick(term)}
+              sx={{ bgcolor: '#F9EF9F', color: '#333' }}
+            />
+          ))}
+        </Stack>
+      )}
 
       {/* Carousel or Search Results */}
       {showCarousel ? (
-        <Box sx={{ px: 7, pt: 5 }}>
+        <Box sx={{ px: 4, pt: 2 }}>
           <Slider {...settings}>
             {popularPins.map((card, index) => (
               <Box key={index} px={1}>
                 <img
                   src={card.image}
                   alt={card.title}
-                  style={{ width: '100%', height: '600px', objectFit: 'cover', borderRadius: '12px' }}
+                  style={{ width: '100%', height: '500px', objectFit: 'cover', borderRadius: '12px' }}
                 />
+                <Typography align="center" mt={1}>{card.title}</Typography>
               </Box>
             ))}
           </Slider>
         </Box>
       ) : (
-        <Box px={2} pt={1}>
+        <Box px={4} pt={2}>
           <Grid cards={searchResults} />
         </Box>
       )}
