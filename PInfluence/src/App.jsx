@@ -8,6 +8,7 @@ import {
 } from "react-router-dom";
 import Grid from "./Grid";
 import Navbar from "./Navbar";
+import SearchPage from "./SearchPage";
 import clothesWomenData from "./data/clothesWomen";
 import "./App.css";
 import Chatbox from "./Chatbox";
@@ -21,22 +22,6 @@ function AppWrapper() {
   const [isChatOpen, setIsChatOpen] = useState(false); // ✅ New state
   const navigate = useNavigate();
   const location = useLocation();
-
-  function AppWrapper() {
-    const [searchTerm, setSearchTerm] = useState("");
-    const [isChatOpen, setIsChatOpen] = useState(false); 
-    const navigate = useNavigate();
-    const location = useLocation();
-  
-    // ✅ Add this useEffect to control page scroll
-    useEffect(() => {
-      if (isChatOpen) {
-        document.body.classList.add("modal-open");
-      } else {
-        document.body.classList.remove("modal-open");
-      }
-    }, [isChatOpen]);
-  }
 
   const handleSearch = (term) => {
     setSearchTerm(term);
