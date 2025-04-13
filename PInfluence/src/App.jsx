@@ -1,12 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+
 import Grid from './Grid';
 import Navbar from './Navbar';
 import HomePage from './Homepage/HomePage';
+import LoginPage from './LogIn'; // ✅ Make sure this is the correct path
 import './App.css';
 
 function App() {
   const [cards, setCards] = useState([]);
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // 🔐 Track login
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const signUpRef = useRef(null);
+
+  const scrollToSignUp = () => {
+    signUpRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   useEffect(() => {
     const fetchImages = () => {
@@ -35,19 +43,26 @@ function App() {
     };
 
     if (isLoggedIn) {
-      fetchImages(); // only fetch when logged in
+      fetchImages();
     }
   }, [isLoggedIn]);
 
   return (
-    <div className="App">
-      <Navbar />
-      {!isLoggedIn ? (
-        <HomePage />
-      ) : (
-        <Grid cards={cards} />
-      )}
-    </div>
+    <Router>
+      <div className="App">
+        <Navbar scrollToSignUp={scrollToSignUp} />
+        <Routes>
+          <Route path="/" element={
+            !isLoggedIn ? (
+              <HomePage signUpRef={signUpRef} />
+            ) : (
+              <Grid cards={cards} />
+            )
+          } />
+          <Route path="/login" element={<LoginPage />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 

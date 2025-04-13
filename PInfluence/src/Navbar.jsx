@@ -1,10 +1,26 @@
 import React from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 
-export default function Navbar() {
+export default function Navbar({ scrollToSignUp }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleLoginClick = () => {
+    if (location.pathname !== '/login') {
+      navigate('/login');
+    }
+  };
+
+  const handleLogoClick = () => {
+    if (location.pathname !== '/') {
+      navigate('/');
+    }
+  };
+
   return (
     <AppBar
       position="sticky"
@@ -22,16 +38,18 @@ export default function Navbar() {
           flexWrap: 'wrap',
         }}
       >
-        {/* Logo */}
+        {/* Logo (clickable) */}
         <Box
           component="img"
           src="/PInfluence LOGO.png"
           alt="Logo"
+          onClick={handleLogoClick}
           sx={{
             width: { xs: '140px', sm: '160px', md: '190px' },
             height: { xs: '50px', sm: '60px', md: '70px' },
             transition: 'transform 0.3s ease-in-out',
             padding: '5px',
+            cursor: 'pointer',
             '&:hover': {
               transform: 'scale(1.05)',
             },
@@ -50,6 +68,7 @@ export default function Navbar() {
         >
           <Button
             variant="contained"
+            onClick={scrollToSignUp}
             sx={{
               backgroundColor: '#e692c3',
               color: '#FFF',
@@ -67,6 +86,7 @@ export default function Navbar() {
           </Button>
           <Button
             variant="contained"
+            onClick={handleLoginClick}
             sx={{
               backgroundColor: '#9698d3',
               color: '#FFF',

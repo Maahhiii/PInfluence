@@ -1,10 +1,10 @@
-// src/Homepage/HomePage.jsx
 import React from "react";
 import { motion } from "framer-motion";
 import RollingGallery from "./RollingGallery";
 import SignUpForm from "./SignUp";
 import Footer from "./Footer"; // Import the Footer component
 import "./HomePage.css";
+import FlowingMenu from './FlowingMenu'
 
 const sections = [
   {
@@ -18,14 +18,14 @@ const sections = [
     content:
       "Beyond inspiration - make it yours. Hover over pins to explore where to buy. Instant shopping, no searching.",
     emoji: "🛍️",
-    bg: "#E4F9F5",
+    bg: "#cef3a4",
   },
   {
     title: "Your Social Visual Space",
     content:
       "Boards made to be shared. With Girl Mode and Boy Mode themes. Save, share, and vibe your way.",
     emoji: "💕",
-    bg: "#FFF0F5",
+    bg: "#facada",
   },
   {
     title: "Ready to Pin Your World?",
@@ -37,7 +37,7 @@ const sections = [
   },
 ];
 
-const HomePage = () => {
+const HomePage = ({ signUpRef }) => {
   return (
     <div className="snap-container">
       {sections.map((section, i) => (
@@ -58,7 +58,7 @@ const HomePage = () => {
             {i === 0 && <RollingGallery autoplay pauseOnHover />}
             {section.cta && (
               <div style={{ width: "100%" }}>
-                <SignUpForm />
+                <SignUpForm ref={signUpRef} />  {/* Use the signUpRef here */}
               </div>
             )}
           </div>
