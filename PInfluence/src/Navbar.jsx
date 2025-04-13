@@ -7,44 +7,59 @@ import Box from '@mui/material/Box';
 export default function Navbar() {
   return (
     <AppBar
-      position="static"
+      position="sticky"
       sx={{
-        backgroundColor: '#FFFACD', // Soft yellow background
+        backgroundColor: '#fdf6b6',
         boxShadow: 'none',
-        padding: '0 16px',
+        top: 0,
+        zIndex: 1100,
       }}
     >
-      <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
-        {/* Logo Section */}
+      <Toolbar
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+        }}
+      >
+        {/* Logo */}
         <Box
           component="img"
-          src="/PInfluence LOGO.png" // Replace with your logo's path
+          src="/PInfluence LOGO.png"
           alt="Logo"
           sx={{
-            width: '190px',       // Corrected: value in string
-            height: '80px',      // Corrected: value in string
-            marginRight: '10px', // Corrected: value in string
+            width: { xs: '140px', sm: '160px', md: '190px' },
+            height: { xs: '50px', sm: '60px', md: '70px' },
             transition: 'transform 0.3s ease-in-out',
+            padding: '5px',
+            '&:hover': {
+              transform: 'scale(1.05)',
+            },
           }}
         />
 
-        {/* Buttons Section */}
-        <Box>
+        {/* Buttons */}
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: { xs: 'column', sm: 'row' },
+            alignItems: 'center',
+            gap: 1,
+            marginTop: { xs: 1, sm: 0 },
+          }}
+        >
           <Button
             variant="contained"
             sx={{
-              backgroundColor: '#007BFF', // Blue color for "Sign Up"
+              backgroundColor: '#e692c3',
               color: '#FFF',
               borderRadius: '50px',
               padding: '8px 16px',
               fontSize: '16px',
               textTransform: 'capitalize',
-              marginRight: 1,
-              boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
               '&:hover': {
-                backgroundColor: '#0056b3', // Darker blue on hover
-                transform: 'scale(1.05)', // Slight scaling effect
-                transition: 'all 0.3s ease-in-out',
+                backgroundColor: '#b47399',
+                transform: 'scale(1.05)',
               },
             }}
           >
@@ -53,17 +68,15 @@ export default function Navbar() {
           <Button
             variant="contained"
             sx={{
-              backgroundColor: '#FF0055', // Red color for "Log In"
+              backgroundColor: '#9698d3',
               color: '#FFF',
               borderRadius: '50px',
               padding: '8px 16px',
               fontSize: '16px',
               textTransform: 'capitalize',
-              boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
               '&:hover': {
-                backgroundColor: '#b3003b', // Darker red on hover
-                transform: 'scale(1.05)', // Slight scaling effect
-                transition: 'all 0.3s ease-in-out',
+                backgroundColor: '#7375a2',
+                transform: 'scale(1.05)',
               },
             }}
           >

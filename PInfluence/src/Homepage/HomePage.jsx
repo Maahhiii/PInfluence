@@ -1,14 +1,17 @@
 // src/Homepage/HomePage.jsx
 import React from "react";
 import { motion } from "framer-motion";
+import RollingGallery from "./RollingGallery";
+import SignUpForm from "./SignUp";
+import Footer from "./Footer"; // Import the Footer component
+import "./HomePage.css";
 
 const sections = [
   {
-    title: "Visual meets inspiration.",
+    title: "Where creativity meets influence - without limits.",
     content:
-      "Welcome to PInfluence - where creativity flows through a grid of stunning visuals and mood boards. Curate your world with pins that spark ideas, emotions, and style.",
-    emoji: "🌀",
-    bg: "#FDE2E4",
+      "Turn your ideas into influence with tools designed for creativity, connection, and impact.",
+    bg: "#B0E0E6",
   },
   {
     title: "Pins with a Purpose",
@@ -36,49 +39,33 @@ const sections = [
 
 const HomePage = () => {
   return (
-    <div>
+    <div className="snap-container">
       {sections.map((section, i) => (
         <motion.div
           key={i}
+          className="snap-section"
           initial={{ opacity: 0, y: 100 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: i * 0.2 }}
           viewport={{ once: true }}
           style={{
             backgroundColor: section.bg,
-            minHeight: "100vh",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
-            padding: "4rem 2rem",
-            textAlign: "center",
           }}
         >
-          <h2 style={{ fontSize: "2.5rem", fontFamily: "cursive" }}>
-            {section.emoji} {section.title}
-          </h2>
-          <p style={{ maxWidth: "800px", margin: "1rem 0", fontSize: "1.2rem" }}>
-            {section.content}
-          </p>
-          {section.cta && (
-            <button
-              style={{
-                background: "#5F9EA0",
-                color: "#fff",
-                padding: "1rem 2rem",
-                fontSize: "1rem",
-                border: "none",
-                borderRadius: "25px",
-                cursor: "pointer",
-                marginTop: "1rem",
-              }}
-            >
-              Get Started
-            </button>
-          )}
+          <div className="card-content">
+            <h2>{section.emoji} {section.title}</h2>
+            <p>{section.content}</p>
+            {i === 0 && <RollingGallery autoplay pauseOnHover />}
+            {section.cta && (
+              <div style={{ width: "100%" }}>
+                <SignUpForm />
+              </div>
+            )}
+          </div>
         </motion.div>
       ))}
+      {/* Add the footer here */}
+      <Footer />
     </div>
   );
 };
