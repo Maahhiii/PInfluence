@@ -1,15 +1,15 @@
-// src/App.jsx
 import React, { useState, useEffect } from 'react';
 import Grid from './Grid';
 import Navbar from './Navbar';
+import HomePage from './Homepage/HomePage';
 import './App.css';
 
 function App() {
   const [cards, setCards] = useState([]);
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // 🔐 Track login
 
   useEffect(() => {
     const fetchImages = () => {
-      // Add more product information
       const images = [
         { 
           image: '/images/image1.jpg', 
@@ -30,18 +30,23 @@ function App() {
           shopLink: 'https://example.com/argyle-outfit'
         },
       ];
-    
       const repeatedImages = Array(20).fill(images).flat();
       setCards(repeatedImages);
     };
 
-    fetchImages();
-  }, []);
+    if (isLoggedIn) {
+      fetchImages(); // only fetch when logged in
+    }
+  }, [isLoggedIn]);
 
   return (
     <div className="App">
       <Navbar />
-      <Grid cards={cards} />
+      {!isLoggedIn ? (
+        <HomePage />
+      ) : (
+        <Grid cards={cards} />
+      )}
     </div>
   );
 }

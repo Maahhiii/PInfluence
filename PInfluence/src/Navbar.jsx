@@ -1,36 +1,76 @@
-import { useState, useEffect } from "react";
-import "./Navbar.css"; 
+import React from 'react';
+import AppBar from '@mui/material/AppBar';
+import Toolbar from '@mui/material/Toolbar';
+import Button from '@mui/material/Button';
+import Box from '@mui/material/Box';
 
 export default function Navbar() {
-  const [isScrolled, setIsScrolled] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
-
   return (
-    <nav className={`navbar ${isScrolled ? "scrolled" : ""}`}>
-      <div className="nav-container">
-        {/* Left side: Logo and Brand Name */}
-        <div className="logo">
-          <img src="/PInfluence-logo.png" alt="PInfluence Logo" className="logo-img" />
-          <span className="brand-name">PInfluence</span>
-        </div>
+    <AppBar
+      position="static"
+      sx={{
+        backgroundColor: '#FFFACD', // Soft yellow background
+        boxShadow: 'none',
+        padding: '0 16px',
+      }}
+    >
+      <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
+        {/* Logo Section */}
+        <Box
+          component="img"
+          src="/PInfluence LOGO.png" // Replace with your logo's path
+          alt="Logo"
+          sx={{
+            width: '190px',       // Corrected: value in string
+            height: '80px',      // Corrected: value in string
+            marginRight: '10px', // Corrected: value in string
+            transition: 'transform 0.3s ease-in-out',
+          }}
+        />
 
-        {/* Right side: Sign In & Log In Buttons */}
-        <div className="right-container">
-          <button className="btn sign-in">Sign Up</button>
-          <button className="btn log-in">Log In</button>
-        </div>
-      </div>
-    </nav>
+        {/* Buttons Section */}
+        <Box>
+          <Button
+            variant="contained"
+            sx={{
+              backgroundColor: '#007BFF', // Blue color for "Sign Up"
+              color: '#FFF',
+              borderRadius: '50px',
+              padding: '8px 16px',
+              fontSize: '16px',
+              textTransform: 'capitalize',
+              marginRight: 1,
+              boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
+              '&:hover': {
+                backgroundColor: '#0056b3', // Darker blue on hover
+                transform: 'scale(1.05)', // Slight scaling effect
+                transition: 'all 0.3s ease-in-out',
+              },
+            }}
+          >
+            Sign Up
+          </Button>
+          <Button
+            variant="contained"
+            sx={{
+              backgroundColor: '#FF0055', // Red color for "Log In"
+              color: '#FFF',
+              borderRadius: '50px',
+              padding: '8px 16px',
+              fontSize: '16px',
+              textTransform: 'capitalize',
+              boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
+              '&:hover': {
+                backgroundColor: '#b3003b', // Darker red on hover
+                transform: 'scale(1.05)', // Slight scaling effect
+                transition: 'all 0.3s ease-in-out',
+              },
+            }}
+          >
+            Log In
+          </Button>
+        </Box>
+      </Toolbar>
+    </AppBar>
   );
 }
