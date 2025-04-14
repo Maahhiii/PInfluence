@@ -1,135 +1,249 @@
-import React, { useState, useEffect } from 'react';
-import { Box, TextField, Typography, Button, Stack, Chip } from '@mui/material';
+import React, { useState, useEffect, useRef } from 'react';
+import { Box, TextField, Typography, Button, Menu, MenuItem } from '@mui/material';
 import Slider from 'react-slick';
 import Grid from './Grid';
-import clothesWomenData from './data/clothesWomen';
-import clothesMenData from './data/clothesMen';
 import './SearchPage.css';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
+import TiltedCard from './TiltedCard';
+import clothesWomen from './data/clothesWomen';
+import clothesMen from './data/clothesMen';
 
 const SearchPage = ({ searchTerm: initialSearchTerm = '', isMale }) => {
   const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
   const [searchResults, setSearchResults] = useState([]);
   const [showCarousel, setShowCarousel] = useState(true);
   const [searchHistory, setSearchHistory] = useState([]);
+  const [anchorEl, setAnchorEl] = useState(null);
 
-  const data = isMale ? clothesMenData : clothesWomenData;
-  const popularPins = data.slice(0, 6);
+  const searchInputRef = useRef(null);
+
+  const carouselData = [
+    { image: '/SearchPageImg/image1.jpg', title: 'Fashion will find you' },
+    { image: '/SearchPageImg/image2.jpg', title: 'Never too many options' },
+    { image: '/SearchPageImg/image3.jpg', title: 'Build your closet' },
+    { image: '/SearchPageImg/image4.jpg', title: 'Classy is the key' },
+    { image: '/SearchPageImg/image5.jpg', title: 'Black screams power' },
+    { image: '/SearchPageImg/image6.jpg', title: 'Colors should match' },
+  ];
 
   useEffect(() => {
     if (initialSearchTerm.trim()) {
-      handleSearch();
+      handleSearch(initialSearchTerm);
+    }
+
+    if (searchInputRef.current) {
+      searchInputRef.current.focus();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialSearchTerm]);
 
-  const handleSearch = () => {
+  const handleSearch = (term = searchTerm) => {
+    const data = isMale ? clothesMen : clothesWomen;
+
     const filtered = data.filter(card =>
-      card.title.toLowerCase().includes(searchTerm.toLowerCase())
+      card.title.toLowerCase().includes(term.toLowerCase())
     );
+
     setSearchResults(filtered);
     setShowCarousel(false);
 
-    if (searchTerm && !searchHistory.includes(searchTerm)) {
-      setSearchHistory(prev => [...prev.slice(-4), searchTerm]);
+    const cleanedTerm = term.trim();
+    if (cleanedTerm && !searchHistory.includes(cleanedTerm.toLowerCase())) {
+      setSearchHistory(prev => [
+        ...prev.filter(t => t.toLowerCase() !== cleanedTerm.toLowerCase()).slice(-4),
+        cleanedTerm
+      ]);
     }
   };
 
   const handleChipClick = (term) => {
     setSearchTerm(term);
-    const filtered = data.filter(card =>
-      card.title.toLowerCase().includes(term.toLowerCase())
-    );
-    setSearchResults(filtered);
-    setShowCarousel(false);
+    handleSearch(term);
+    setAnchorEl(null);
+  };
+
+  const handleDropdownClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleDropdownClose = () => {
+    setAnchorEl(null);
   };
 
   const settings = {
     dots: true,
-    infinite: false,
+    infinite: true,
     speed: 500,
     slidesToShow: 3,
     slidesToScroll: 1,
     autoplay: true,
-    autoplaySpeed: 4000,
-    responsive: [
-      {
-        breakpoint: 768,
-        settings: {
-          slidesToShow: 2,
-        }
-      },
-      {
-        breakpoint: 480,
-        settings: {
-          slidesToShow: 1,
-        }
-      }
-    ]
+    autoplaySpeed: 2000,
+    appendDots: dots => (
+      <div style={{ marginTop: '20px' }}>
+        <ul style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>{dots}</ul>
+      </div>
+    ),
+    customPaging: i => (
+      <div className="custom-heart-dot">🩷</div>
+    ),
+    
   };
 
+  
+  
+
   return (
-    <Box sx={{ width: '100vw', minHeight: '100vh', bgcolor: '#FFF6E3', color: '#1E1E1E', overflow: 'hidden' }}>
-      {/* Custom Navbar for Search Page */}
-      <Box sx={{ bgcolor: '#AFA8F0', px: 4, py: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }}>
-        <Typography variant="h6" fontWeight={600} sx={{ color: 'white' }}>PInfluence</Typography>
-        <Box sx={{ display: 'flex', gap: 2, flexGrow: 1, mx: 4 }}>
-          <TextField
-            fullWidth
-            placeholder="Search..."
-            variant="outlined"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            sx={{ bgcolor: 'white', borderRadius: 2 }}
-          />
-          <Button
-            variant="contained"
-            onClick={handleSearch}
-            sx={{ bgcolor: '#FC9CE3', color: 'black', px: 4, borderRadius: 2 }}
-          >
-            Search
-          </Button>
-        </Box>
+    <Box sx={{ width: '100vw', minHeight: '100vh', bgcolor: '#FFF6E3', color: '#1E1E1E', overflow: 'hidden', px: { xs: 1.5, md: 3 },}}>
+      {/* Navbar */}
+    <Box
+      sx={{
+        width: '100%',
+        px: { xs: 1.5, md: 3 },
+        py: { xs: 2, md: 4 },
+        bgcolor: 'transparent',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: 2,
+        position: 'relative',
+      }}
+    >
+        <Box
+        sx={{
+          width: '100%',
+          maxWidth: '800px',
+          backdropFilter: 'blur(12px)',
+          background: 'rgba(255, 255, 255, 0.7)',
+          boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
+          border: '1px solid rgba(255, 255, 255, 0.3)',
+          borderRadius: '50px',
+          px: { xs: 2, md: 3 },
+          py: { xs: 1.5, md: 2 },
+          display: 'flex',
+          alignItems: 'center',
+          gap: 2,
+        }}
+      >
+        <TextField
+          fullWidth
+          placeholder="Looking for something?"
+          variant="standard"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          onClick={handleDropdownClick}
+          inputRef={searchInputRef}
+          InputProps={{
+            disableUnderline: true,
+            sx: {
+              px: 2,
+              py: 1,
+              borderRadius: '30px',
+              bgcolor: 'white',
+              fontSize: '16px',
+              '&:focus-within': {
+                boxShadow: '0 0 0 2px #CDC1FF',
+              },
+            },
+          }}
+        />
+
+        <Button
+          variant="contained"
+          onClick={() => handleSearch()}
+          sx={{
+            bgcolor: '#FC9CE3',
+            color: 'black',
+            px: { xs: 3, md: 4 },
+            py: 1,
+            borderRadius: '999px',
+            fontWeight: 600,
+            fontSize: { xs: '12px', md: '14px' },
+            boxShadow: '0px 4px 10px rgba(252, 156, 227, 0.4)',
+            textTransform: 'none',
+            '&:hover': {
+              bgcolor: '#f693db',
+            },
+          }}
+        >
+          Search
+        </Button>
+
+        {/* Search History Dropdown */}
+        <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleDropdownClose}>
+          {searchHistory.length > 0 ? (
+            searchHistory.map((term, idx) => (
+              <MenuItem key={idx} onClick={() => handleChipClick(term)}>
+                {term}
+              </MenuItem>
+            ))
+          ) : (
+            <MenuItem disabled>No recent searches</MenuItem>
+          )}
+        </Menu>
       </Box>
 
-      {/* Search History */}
-      {searchHistory.length > 0 && (
-        <Stack direction="row" spacing={1} my={2} px={4} flexWrap="wrap">
-          <Typography variant="body1" sx={{ mr: 1 }}>Recent:</Typography>
-          {searchHistory.map((term, idx) => (
-            <Chip
-              key={idx}
-              label={term}
-              clickable
-              onClick={() => handleChipClick(term)}
-              sx={{ bgcolor: '#F9EF9F', color: '#333' }}
-            />
-          ))}
-        </Stack>
-      )}
+    </Box>
 
       {/* Carousel or Search Results */}
-      {showCarousel ? (
-        <Box sx={{ px: 4, pt: 2 }}>
-          <Slider {...settings}>
-            {popularPins.map((card, index) => (
-              <Box key={index} px={1}>
-                <img
-                  src={card.image}
-                  alt={card.title}
-                  style={{ width: '100%', height: '500px', objectFit: 'cover', borderRadius: '12px' }}
-                />
-                <Typography align="center" mt={1}>{card.title}</Typography>
-              </Box>
-            ))}
-          </Slider>
+{showCarousel ? (
+  <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', px: { xs: 2, md: 4 } }}>
+    <Slider
+      {...settings}
+      style={{ width: '100%' }}
+    >
+      {carouselData.map((card, index) => (
+        <Box
+          key={index}
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          sx={{ width: '100%' }} 
+          className="card"// Ensures that each item takes full width
+        >
+          <TiltedCard
+            imageSrc={card.image}
+            altText={card.title}
+            captionText={card.title}
+            imageHeight="550px"
+            imageWidth="420px" // Keep this width consistent with the carousel
+            rotateAmplitude={10}
+            scaleOnHover={1.02}
+            showMobileWarning={false}
+            showTooltip={false}
+            displayOverlayContent={true}
+            overlayContent={
+              <div
+                style={{
+                  position: 'absolute',
+                  bottom: '10px',
+                  left: '10px',
+                  padding: '10px 15px',
+                  borderRadius: '10px',
+                  color: '#FFFFFF',
+                  fontWeight: '600',
+                  fontSize: '20px',
+                  backdropFilter: 'blur(6px)',
+                  zIndex: 10, // make sure it stays above the image
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}
+              >
+                {card.title}
+              </div>
+            }
+          />
         </Box>
-      ) : (
-        <Box px={4} pt={2}>
-          <Grid cards={searchResults} />
-        </Box>
-      )}
+      ))}
+    </Slider>
+  </Box>
+) : (
+  <Box px={{ xs: 2, md: 4 }} pt={4}>
+    <Grid cards={searchResults} />
+  </Box>
+)}
+
     </Box>
   );
 };

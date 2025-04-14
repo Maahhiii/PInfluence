@@ -1,4 +1,35 @@
-.slick-dots li button:before {
-    color: #AFA8F0;
+/* Remove default dots */
+.slick-dots li button {
+    display: none !important;
+  }
+  
+  /* Use our heart instead */
+  .custom-heart-dot {
+    font-size: 20px;
+    opacity: 0.4;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    cursor: pointer;
+  }
+  
+  /* Active heart */
+  .slick-dots li.slick-active .custom-heart-dot {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  
+  /* Ensure padding doesn't overflow */
+* {
+    box-sizing: border-box;
+  }
+  
+  /* Prevent horizontal scroll from sneaky overflow */
+  body {
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+  }
+
+  .card:hover img {
+    opacity: 0.7;
   }
   
