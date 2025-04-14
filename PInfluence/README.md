@@ -1,12 +1,18 @@
-# React + Vite
+# 📌 PInfluence
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**PInfluence** is a modern, Pinterest-inspired web app that lets users explore, save, and share aesthetic pins related to fashion, food, accessories, and more. It features a beautiful pastel UI, seamless animations, search, authentication, chat, and custom boards — all built from scratch using **React**, **Firebase**, and **Tailwind CSS**.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## ✨ Features
 
-## Expanding the ESLint configuration
+- 🖼️ **HomePage** with animated sections and interactive carousels
+- 👤 **User authentication** via Firebase (Sign Up & Login)
+- 🔍 **Search functionality** with results filtering by gender
+- 🧵 **Gender toggle** (Boy Mode / Girl Mode) with different content
+- 💬 **Chatbox** with pastel-themed messaging UI and shared pins
+- 🗂️ **Pin boards** (coming soon)
+- 📱 Responsive design using **Tailwind CSS**
+- 🧚 Modal UI and chatbox using **Framer Motion**, soft blur, and pastel palettes
 
-If you are developing a production application, we recommend using TypeScript and enable type-aware lint rules. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+---
