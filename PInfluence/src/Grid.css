@@ -1,9 +1,10 @@
 /* src/Grid.css */
 .masonry-grid {
     display: flex;
-    margin-left: -5px; /* Adjust gap between columns */
+    margin-left: -15px; /* Adjust gap between columns */
     width: auto;
     margin-top: 15px;
+    min-height: 100vh;
   }
   
   .masonry-grid_column {
@@ -20,9 +21,12 @@
   
   .card img {
     width: 100%;
+    display: block;
+    object-fit: cover;
+    transition: all 0.3s ease, opacity 0.3s ease;
     border-radius: 10px;
-    transition: transform 0.3s ease, opacity 0.3s ease; /* Smooth transition for hover effects */
   }
+  
   
   .card:hover img {
     transform: scale(1.05); /* Slightly enlarge the image on hover */
@@ -61,5 +65,39 @@
   
   .card .overlay button:hover {
     background-color: #ff1493; /* Darker pink on button hover */
+  }
+  
+  .load-more-container {
+    display: flex;
+    justify-content: center;
+    margin: 40px 0 60px;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .load-more-btn {
+    background: linear-gradient(135deg, #FFCCEA, #CDC1FF);
+    color: #fff;
+    padding: 12px 28px;
+    border: none;
+    border-radius: 999px;
+    font-size: 1rem;
+    font-weight: 600;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .load-more-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+  }
+  
+  .loading-text {
+    text-align: center;
+    font-size: 1rem;
+    font-weight: 500;
+    margin: 30px 0;
+    color: #AFA8F0;
   }
   

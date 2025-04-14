@@ -10,16 +10,28 @@ import Grid from "./Grid";
 import Navbar from "./Navbar";
 import SearchPage from "./SearchPage";
 import clothesWomenData from "./data/clothesWomen";
+import clothesMenData from "./data/clothesMen";
 import "./App.css";
 import Chatbox from "./Chatbox";
 
-function HomePage() {
-  return <Grid cards={clothesWomenData} />;
+function shuffleArray(array) {
+  return array
+    .map((value) => ({ value, sort: Math.random() }))
+    .sort((a, b) => a.sort - b.sort)
+    .map(({ value }) => value);
+}
+
+function HomePage({ isMale }) {
+  const cards = isMale ? clothesMenData : clothesWomenData;
+  const shuffledCards = shuffleArray(cards); // ✅ Shuffle the cards
+
+  return <Grid cards={shuffledCards} />;
 }
 
 function AppWrapper() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [isChatOpen, setIsChatOpen] = useState(false); // ✅ New state
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isMale, setIsMale] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -34,6 +46,10 @@ function AppWrapper() {
     setIsChatOpen(true);
   };
 
+  const handleToggleGender = () => {
+    setIsMale((prev) => !prev);
+  };
+
   const closeChat = () => {
     setIsChatOpen(false);
   };
@@ -41,15 +57,19 @@ function AppWrapper() {
   return (
     <div className="App">
       {location.pathname !== "/search" && (
-        <Navbar onSearch={handleSearch} onChatClick={handleChatClick} />
+        <Navbar
+          onSearch={handleSearch}
+          onChatClick={handleChatClick}
+          onToggleGender={handleToggleGender}
+          isMale={isMale}
+        />
       )}
 
       <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/search" element={<SearchPage searchTerm={searchTerm} />} />
+        <Route path="/" element={<HomePage isMale={isMale} />} />
+        <Route path="/search" element={<SearchPage searchTerm={searchTerm} isMale={isMale} />} />
       </Routes>
 
-      {/* ✅ Render Chatbox as modal */}
       {isChatOpen && (
         <div className="chatbox-overlay" onClick={closeChat}>
           <div className="chatbox-modal" onClick={(e) => e.stopPropagation()}>
