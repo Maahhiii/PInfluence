@@ -32,38 +32,6 @@
   cursor: pointer;
 }
 
-.modal-image-container {
-  position: relative;
-  overflow: hidden;
-}
-
-.modal-image {
-  width: 100%;
-  max-height: 75vh;
-  object-fit: cover;
-  display: block;
-  transition: transform 0.3s ease;
-}
-
-.modal-image-container:hover .modal-image {
-  transform: scale(1.02);
-}
-
-.modal-image-container:hover::after {
-  content: "✨";
-  position: absolute;
-  top: 10%;
-  left: 10%;
-  font-size: 2rem;
-  color: #F9EF9F;
-  animation: sparkle 1s ease infinite alternate;
-}
-
-@keyframes sparkle {
-  0% { transform: scale(1) rotate(0deg); opacity: 0.8; }
-  100% { transform: scale(1.4) rotate(20deg); opacity: 0.2; }
-}
-
 .modal-buttons {
   display: flex;
   justify-content: space-around;
@@ -85,48 +53,45 @@
   cursor: pointer;
   font-size: 15px;
   transition: all 0.3s ease;
+  position: relative;
 }
 
-.btn-save {
-  background-color: #FC9CE3;
-}
-.btn-save:hover {
-  background-color: #e68dcf;
-}
-
-.btn-send {
-  background-color: #AFA8F0;
-}
-.btn-send:hover {
-  background-color: #9790e2;
+.icon-button::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  border: 2px solid transparent;
+  background-image: linear-gradient(45deg, #AFA8F0, #FC9CE3, #FFD5C2, #F9EF9F, #C6E7FF);
+  background-size: 400% 400%;
+  animation: border-animation 3s linear infinite;
 }
 
-.btn-shop {
-  background-color: #FFD5C2;
-}
-.btn-shop:hover {
-  background-color: #e6c0b0;
+.icon-button:hover::before {
+  animation: border-animation 1s ease-in-out infinite;
 }
 
-.friends-popup {
-  display: flex;
-  justify-content: space-around;
-  padding: 15px;
-  border-top: 1px solid #eee;
-  background-color: rgba(255, 255, 255, 0.1);
+@keyframes border-animation {
+  0% {
+    background-position: 400% 0;
+  }
+  100% {
+    background-position: 0 100%;
+  }
 }
 
-.friend {
-  text-align: center;
-  color: white;
-  cursor: pointer;
+.modal-image {
+  max-width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+  border-radius: 16px; /* Rounded corners */
+  border: 4px solid white; /* White border */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Optional shadow for better aesthetics */
 }
 
-.friend-avatar {
-  width: 52px;
-  height: 52px;
-  border-radius: 999px;
-  margin-bottom: 6px;
-  object-fit: cover;
-  border: 2px solid white;
+.avatar-container {
+  background: linear-gradient(135deg, #AFA8F0, #FFD5C2);
+  border-radius: 50%;
+  padding: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }

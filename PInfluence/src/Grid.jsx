@@ -19,15 +19,15 @@ function Grid({ cards, filter }) {
     setVisibleCount(40);
   }, [filter, cards]);
 
-  const shuffleCards = (arr) => {
-    return arr.slice().sort(() => 0.5 - Math.random());
-  };
+  const shuffleCards = (arr) => arr.slice().sort(() => 0.5 - Math.random());
 
   const loadMore = () => {
     setTimeout(() => {
-      const moreCards = shuffleCards(cards.filter(card => !filter || card.category === filter)).slice(0, 15);
-      setAllCards((prev) => [...prev, ...moreCards]);
-      setVisibleCount((prev) => prev + moreCards.length);
+      const moreCards = shuffleCards(
+        cards.filter(card => !filter || card.category === filter)
+      ).slice(0, 15);
+      setAllCards(prev => [...prev, ...moreCards]);
+      setVisibleCount(prev => prev + moreCards.length);
     }, 800);
   };
 
@@ -43,12 +43,10 @@ function Grid({ cards, filter }) {
     setIsModalOpen(true);
   };
 
-  const closeModal = () => {
-    setIsModalOpen(false);
-  };
+  const closeModal = () => setIsModalOpen(false);
 
   return (
-    <>
+    <div className="grid-wrapper">
       <InfiniteScroll
         dataLength={visibleCount}
         next={loadMore}
@@ -78,13 +76,10 @@ function Grid({ cards, filter }) {
         </Masonry>
       </InfiniteScroll>
 
-      <Modal
-        isOpen={isModalOpen}
-        onClose={closeModal}
-        card={selectedCard}
-      />
-    </>
+      <Modal isOpen={isModalOpen} onClose={closeModal} card={selectedCard} />
+    </div>
   );
 }
 
 export default Grid;
+  

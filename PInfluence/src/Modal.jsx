@@ -14,7 +14,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import SendIcon from '@mui/icons-material/Send';
 import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
-import StarIcon from '@mui/icons-material/Star';
+import Iridescence from './Iridescence';
 
 const pastelColors = ['#AFA8F0', '#FC9CE3', '#FFD5C2', '#F9EF9F', '#C6E7FF'];
 
@@ -33,6 +33,7 @@ const modalBackdropStyle = {
 
 function CustomModal({ isOpen, onClose, card }) {
   const [showFriends, setShowFriends] = useState(false);
+  
   const friendIconsRef = useRef(null);
 
   const friends = [
@@ -58,22 +59,6 @@ function CustomModal({ isOpen, onClose, card }) {
       style={{ position: 'relative' }}
     >
       {children}
-      <motion.div
-        initial={{ opacity: 0 }}
-        whileHover={{ opacity: 1 }}
-        transition={{ duration: 0.5 }}
-        style={{
-          position: 'absolute',
-          top: -10,
-          right: -10,
-          display: 'flex',
-          gap: 4,
-        }}
-      >
-        {pastelColors.map((color, i) => (
-          <StarIcon key={i} sx={{ fontSize: 14, color }} />
-        ))}
-      </motion.div>
     </motion.div>
   );
 
@@ -81,14 +66,16 @@ function CustomModal({ isOpen, onClose, card }) {
 
   return (
     <Modal open={isOpen} onClose={onClose}>
-      <Box sx={modalBackdropStyle}>
+      <Box sx={{ ...modalBackdropStyle, position: 'relative', overflow: 'hidden' }}>
         <Box
           component={motion.div}
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.4 }}
           sx={{
-            background: 'linear-gradient(135deg, #FC9CE3, #FFD5C2)',
+            position: 'relative',
+            zIndex: 1,
+            background: 'transparent',
             borderRadius: '16px',
             width: '90%',
             maxWidth: '1000px',
@@ -100,6 +87,23 @@ function CustomModal({ isOpen, onClose, card }) {
             border: '1px solid rgba(255, 255, 255, 0.2)',
           }}
         >
+          {/* 🎨 Iridescence Background */}
+          <Box
+            sx={{
+              position: 'absolute',
+              inset: 0,
+              zIndex: 0,
+              pointerEvents: 'none',
+            }}
+          >
+            <Iridescence
+              color={[255 / 255, 213 / 255, 194 / 255]}
+              mouseReact={false}
+              amplitude={0.1}
+              speed={1.0}
+            />
+          </Box>
+
           <Box display="flex" justifyContent="flex-end">
             <IconButton onClick={onClose} sx={{ color: 'white' }}>
               <CloseIcon />
@@ -107,15 +111,16 @@ function CustomModal({ isOpen, onClose, card }) {
           </Box>
 
           <Box display="flex" justifyContent="center" alignItems="center" flexDirection="column">
-            <Box
-              component="img"
+            <img
               src={card.image}
               alt="Pin"
-              sx={{
+              className="modal-image"
+              style={{
                 maxHeight: '70vh',
                 width: '100%',
                 objectFit: 'contain',
-                borderRadius: 2,
+                borderRadius: '16px',
+                zIndex: 1,
               }}
             />
 
@@ -135,10 +140,11 @@ function CustomModal({ isOpen, onClose, card }) {
                     variant="contained"
                     startIcon={<FavoriteIcon />}
                     sx={{
-                      backgroundColor: '#FC9CE3',
+                      backgroundColor: pastelColors[1],
                       '&:hover': { backgroundColor: '#e68dcf' },
                       borderRadius: '999px',
                       fontWeight: 'bold',
+                      boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)',
                     }}
                   >
                     Save Pin
@@ -162,10 +168,11 @@ function CustomModal({ isOpen, onClose, card }) {
                     startIcon={<SendIcon />}
                     onClick={() => sendToFriend(friends[0])}
                     sx={{
-                      backgroundColor: '#AFA8F0',
+                      backgroundColor: pastelColors[0],
                       '&:hover': { backgroundColor: '#9790e2' },
                       borderRadius: '999px',
                       fontWeight: 'bold',
+                      boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)',
                     }}
                   >
                     Send
@@ -179,7 +186,7 @@ function CustomModal({ isOpen, onClose, card }) {
                 placement="top"
                 componentsProps={{
                   tooltip: {
-                    sx: { bgcolor: pastelColors[4], color: 'black', fontWeight: 500 },
+                    sx: { bgcolor: pastelColors[2], color: 'black', fontWeight: 500 },
                   },
                 }}
               >
@@ -192,10 +199,11 @@ function CustomModal({ isOpen, onClose, card }) {
                     target="_blank"
                     rel="noopener noreferrer"
                     sx={{
-                      backgroundColor: '#FFD5C2',
+                      backgroundColor: pastelColors[2],
                       '&:hover': { backgroundColor: '#e6c0b0' },
                       borderRadius: '999px',
                       fontWeight: 'bold',
+                      boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)',
                     }}
                   >
                     Shop
@@ -205,36 +213,77 @@ function CustomModal({ isOpen, onClose, card }) {
             </Stack>
 
             {showFriends && (
-              <Box ref={friendIconsRef} mt={4} textAlign="center">
-                <Typography variant="h6" color="white" gutterBottom>
+              <Box
+                ref={friendIconsRef}
+                mt={7}
+                py={3}
+                px={4}
+                sx={{
+                  background: 'linear-gradient(135deg, rgba(175,168,240,0.2), rgba(252,156,227,0.2), rgba(255,213,194,0.2))',
+                  backdropFilter: 'blur(14px)',
+                  border: '1.5px solid rgba(255, 255, 255, 0.2)',
+                  borderRadius: '24px',
+                  boxShadow: '0 6px 28px rgba(0, 0, 0, 0.2)',
+                  maxWidth: '960px',
+                  width: '100%',
+                  transition: 'all 0.3s ease-in-out',
+                }}
+              >
+                <Typography
+                  variant="h6"
+                  sx={{
+                    color: '#ffffff',
+                    fontWeight: 600,
+                    textAlign: 'center',
+                    mb: 3,
+                    textShadow: '0 1px 3px rgba(0,0,0,0.3)',
+                  }}
+                >
                   Send to:
                 </Typography>
-                <Stack direction="row" spacing={3} justifyContent="center">
+
+                <Stack direction="row" spacing={5} justifyContent="center">
                   {friends.map((friend, index) => (
-                    <Box
+                    <motion.div
+                      whileHover={{
+                        scale: 1.07,
+                        transition: { type: 'spring', stiffness: 300 },
+                      }}
                       key={index}
+                      style={{ cursor: 'pointer', textAlign: 'center' }}
                       onClick={() => sendToFriend(friend)}
-                      sx={{ cursor: 'pointer' }}
                     >
                       <Avatar
                         src={friend.avatar}
                         alt={friend.name}
                         sx={{
-                          width: 56,
-                          height: 56,
-                          margin: '0 auto',
+                          width: 64,
+                          height: 64,
+                          mx: 'auto',
                           border: '2px solid white',
                           borderRadius: '999px',
+                          boxShadow: `0 0 12px ${pastelColors[index % pastelColors.length]}`,
+                          transition: 'transform 0.3s ease',
                         }}
                       />
-                      <Typography variant="body2" color="white">
+                      <Typography
+                        variant="body2"
+                        mt={1}
+                        sx={{
+                          color: pastelColors[index % pastelColors.length],
+                          fontWeight: 500,
+                          textShadow: '0 1px 1px rgba(0,0,0,0.1)',
+                        }}
+                      >
                         {friend.name}
                       </Typography>
-                    </Box>
+                    </motion.div>
                   ))}
                 </Stack>
               </Box>
             )}
+
+
           </Box>
         </Box>
       </Box>

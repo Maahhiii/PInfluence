@@ -1,103 +1,74 @@
 /* src/Grid.css */
+
+/* Wrapper to align with page layout and scrollbar */
+.grid-wrapper {
+  max-width: 100vw;
+  margin: 0 auto;
+  padding: 1rem 1rem 4rem;
+  min-height: 100vh;
+}
+
+/* Masonry layout */
 .masonry-grid {
-    display: flex;
-    margin-left: -15px; /* Adjust gap between columns */
-    width: auto;
-    margin-top: 15px;
-    min-height: 100vh;
-  }
-  
-  .masonry-grid_column {
-    padding-left: 15px; /* Adjust gap between columns */
-  }
-  
-  .card {
-    position: relative; /* Make the card a positioned element for overlay positioning */
-    border-radius: 10px;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    margin-bottom: 15px;
-    overflow: hidden; /* Ensure content stays within the card's rounded corners */
-  }
-  
-  .card img {
-    width: 100%;
-    display: block;
-    object-fit: cover;
-    transition: all 0.3s ease, opacity 0.3s ease;
-    border-radius: 10px;
-  }
-  
-  
-  .card:hover img {
-    transform: scale(1.05); /* Slightly enlarge the image on hover */
-    opacity: 0.7; /* Reduce opacity to create a blur-like effect */
-  }
-  
-  /* Save Pin button styling */
-  .card .overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(255, 255, 255, 0); /* Transparent background initially */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0; /* Initially hidden */
-    transition: opacity 0.3s ease, background-color 0.3s ease; /* Smooth transition for hover effects */
-  }
-  
-  .card:hover .overlay {
-    background-color: rgba(255, 192, 203, 0.2); /* Light pink overlay on hover */
-    opacity: 1; /* Show overlay on hover */
-  }
-  
-  .card .overlay button {
-    background-color: #ff69b4; /* Light pink button color */
-    color: white; /* Button text color */
-    border: none;
-    border-radius: 20px;
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-  }
-  
-  .card .overlay button:hover {
-    background-color: #ff1493; /* Darker pink on button hover */
-  }
-  
-  .load-more-container {
-    display: flex;
-    justify-content: center;
-    margin: 40px 0 60px;
-    position: relative;
-    z-index: 1;
-  }
-  
-  .load-more-btn {
-    background: linear-gradient(135deg, #FFCCEA, #CDC1FF);
-    color: #fff;
-    padding: 12px 28px;
-    border: none;
-    border-radius: 999px;
-    font-size: 1rem;
-    font-weight: 600;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-    cursor: pointer;
-    transition: all 0.3s ease;
-  }
-  
-  .load-more-btn:hover {
-    transform: scale(1.05);
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
-  }
-  
-  .loading-text {
-    text-align: center;
-    font-size: 1rem;
-    font-weight: 500;
-    margin: 30px 0;
-    color: #AFA8F0;
-  }
-  
+  display: flex;
+  margin-left: -15px; /* Offset for gutter */
+  width: auto;
+}
+
+.masonry-grid_column {
+  padding-left: 15px;
+  background-clip: padding-box;
+}
+
+/* Card container */
+.card {
+  position: relative;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  overflow: hidden;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.card img {
+  width: 100%;
+  display: block;
+  object-fit: cover;
+  transition: all 0.3s ease;
+  border-radius: 10px;
+}
+
+.card:hover img {
+  transform: scale(1.05);
+  opacity: 0.7;
+}
+
+/* Overlay button */
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0);
+  opacity: 0;
+  transition: opacity 0.3s ease, background-color 0.3s ease;
+}
+
+.card:hover .overlay {
+  background-color: rgba(255, 192, 203, 0.2);
+  opacity: 1;
+}
+
+.overlay button {
+  background-color: #ff69b4;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.overlay button:hover {
+  background-color: #ff1493;
+}
