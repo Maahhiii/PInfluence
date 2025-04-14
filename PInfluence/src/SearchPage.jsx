@@ -8,6 +8,9 @@ import 'slick-carousel/slick/slick-theme.css';
 import TiltedCard from './TiltedCard';
 import clothesWomen from './data/clothesWomen';
 import clothesMen from './data/clothesMen';
+import { Home } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
+
 
 const SearchPage = ({ searchTerm: initialSearchTerm = '', isMale }) => {
   const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
@@ -17,6 +20,8 @@ const SearchPage = ({ searchTerm: initialSearchTerm = '', isMale }) => {
   const [anchorEl, setAnchorEl] = useState(null);
 
   const searchInputRef = useRef(null);
+  const navigate = useNavigate();
+
 
   const carouselData = [
     { image: '/SearchPageImg/image1.jpg', title: 'Fashion will find you' },
@@ -110,43 +115,60 @@ const SearchPage = ({ searchTerm: initialSearchTerm = '', isMale }) => {
       }}
     >
         <Box
-        sx={{
-          width: '100%',
-          maxWidth: '800px',
-          backdropFilter: 'blur(12px)',
-          background: 'rgba(255, 255, 255, 0.7)',
-          boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
-          border: '1px solid rgba(255, 255, 255, 0.3)',
-          borderRadius: '50px',
-          px: { xs: 2, md: 3 },
-          py: { xs: 1.5, md: 2 },
-          display: 'flex',
-          alignItems: 'center',
-          gap: 2,
-        }}
-      >
-        <TextField
-          fullWidth
-          placeholder="Looking for something?"
-          variant="standard"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          onClick={handleDropdownClick}
-          inputRef={searchInputRef}
-          InputProps={{
-            disableUnderline: true,
-            sx: {
-              px: 2,
-              py: 1,
-              borderRadius: '30px',
-              bgcolor: 'white',
-              fontSize: '16px',
-              '&:focus-within': {
-                boxShadow: '0 0 0 2px #CDC1FF',
-              },
-            },
-          }}
-        />
+  sx={{
+    width: '100%',
+    maxWidth: '800px',
+    backdropFilter: 'blur(12px)',
+    background: 'rgba(255, 255, 255, 0.7)',
+    boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
+    border: '1px solid rgba(255, 255, 255, 0.3)',
+    borderRadius: '50px',
+    px: { xs: 2, md: 3 },
+    py: { xs: 1.5, md: 2 },
+    display: 'flex',
+    alignItems: 'center',
+    gap: 2,
+  }}
+>
+  {/* 🏠 Home Icon */}
+  <Home
+    onClick={() => navigate('/')}
+    sx={{
+      fontSize: 28,
+      color: '#FC9CE3',
+      cursor: 'pointer',
+      transition: 'transform 0.2s ease',
+      '&:hover': {
+        color: '#CDC1FF',
+        transform: 'scale(1.1)',
+      },
+    }}
+  />
+
+  {/* 🔍 Search TextField */}
+  <TextField
+    fullWidth
+    placeholder="Looking for something?"
+    variant="standard"
+    value={searchTerm}
+    onChange={(e) => setSearchTerm(e.target.value)}
+    onClick={handleDropdownClick}
+    inputRef={searchInputRef}
+    InputProps={{
+      disableUnderline: true,
+      sx: {
+        px: 2,
+        py: 1,
+        borderRadius: '30px',
+        bgcolor: 'white',
+        fontSize: '16px',
+        '&:focus-within': {
+          boxShadow: '0 0 0 2px #CDC1FF',
+        },
+      },
+    }}
+  />
+
 
         <Button
           variant="contained"

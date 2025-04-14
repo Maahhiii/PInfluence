@@ -1,0 +1,51 @@
+/* ProfilePage.css */
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #FFF6E3;
+}
+
+.profile-banner {
+  background: linear-gradient(to right, #AFA8F0, #FC9CE3);
+}
+
+.avatar-glow {
+  box-shadow: 0 0 12px rgba(175, 168, 240, 0.6);
+  border: 4px solid white;
+}
+
+.stats-box {
+  text-align: center;
+}
+
+.board-card {
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(175, 168, 240, 0.3);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+.board-card:hover {
+  transform: scale(1.03);
+  box-shadow: 0 6px 16px rgba(252, 156, 227, 0.4);
+}
+
+.edit-btn {
+  background-color: #FC9CE3 !important;
+  color: #1E1E1E !important;
+  border-radius: 20px !important;
+  padding: 6px 20px;
+  font-weight: 500;
+}
+
+.icon-btn {
+  background-color: #AFA8F0 !important;
+  color: white !important;
+  transition: background-color 0.3s ease;
+}
+
+.icon-btn:hover {
+  background-color: #cdc1ff !important;
+}

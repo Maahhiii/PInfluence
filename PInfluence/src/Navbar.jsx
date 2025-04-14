@@ -1,82 +1,187 @@
+// src/Navbar.jsx
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import SearchIcon from "@mui/icons-material/Search";
+import { useNavigate, useLocation, Link } from "react-router-dom";
+import AppBar from "@mui/material/AppBar";
+import Toolbar from "@mui/material/Toolbar";
+import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
-import "./Navbar.css";
+import SearchIcon from "@mui/icons-material/Search";
+import Box from "@mui/material/Box";
 
-export default function Navbar({ onSearch, onChatClick, onToggleGender, isMale }) {
+export default function Navbar({ onSearch, onChatClick, onToggleGender, isMale, scrollToSignUp }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
     };
-
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const goToSearchPage = () => {
-    navigate("/search");
+  const handleLoginClick = () => {
+    if (location.pathname !== "/login") navigate("/login");
   };
 
-  return (
-    <nav className={`navbar ${isScrolled ? "scrolled" : ""}`}>
-      <div className="nav-container">
-        <div className="logo">
-          <img src="/PInfluence-logo.png" alt="PInfluence Logo" className="logo-img" />
-          <span className="brand-name">PInfluence</span>
-        </div>
+  const handleLogoClick = () => {
+    if (location.pathname !== "/") navigate("/");
+  };
 
-        <div className="right-container">
+  const goToSearchPage = () => navigate("/search");
+
+  return (
+    <AppBar
+      position="sticky"
+      sx={{
+        backgroundColor: "#FFF6E3",
+        boxShadow: isScrolled ? "0 2px 10px rgba(0,0,0,0.1)" : "none",
+        top: 0,
+        zIndex: 1100,
+        transition: "box-shadow 0.3s ease",
+      }}
+    >
+      <Toolbar
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          flexWrap: "wrap",
+          px: 2,
+          py: 1,
+        }}
+      >
+        {/* Logo */}
+        <Box
+          component="img"
+          src="/PInfluence-logo.png"
+          alt="PInfluence Logo"
+          onClick={handleLogoClick}
+          sx={{
+            width: { xs: "140px", sm: "160px", md: "190px" },
+            height: { xs: "50px", sm: "60px", md: "70px" },
+            transition: "transform 0.3s ease-in-out",
+            padding: "5px",
+            cursor: "pointer",
+            "&:hover": {
+              transform: "scale(1.05)",
+            },
+          }}
+        />
+
+        {/* Right Side Buttons */}
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", sm: "row" },
+            alignItems: "center",
+            gap: 1,
+            marginTop: { xs: 1, sm: 0 },
+          }}
+        >
           <Tooltip title="Search" arrow>
-            <IconButton onClick={goToSearchPage} sx={{ color: "white" }}>
+            <IconButton onClick={goToSearchPage} sx={{ color: "#2E1065" }}>
               <SearchIcon />
             </IconButton>
           </Tooltip>
 
-          <button
+          <Button
             onClick={onChatClick}
-            className="btn chat-btn"
-            style={{
+            variant="contained"
+            sx={{
               backgroundColor: "#CDC1FF",
               color: "#2E1065",
+              borderRadius: "50px",
               padding: "6px 14px",
-              borderRadius: "20px",
-              marginLeft: "10px",
               fontWeight: "bold",
-              border: "none",
-              boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
-              cursor: "pointer",
+              textTransform: "capitalize",
+              "&:hover": {
+                backgroundColor: "#b9adf7",
+                transform: "scale(1.05)",
+              },
             }}
           >
             Chat
-          </button>
+          </Button>
 
-          <button
+          <Button
             onClick={onToggleGender}
-            className="btn toggle-gender-btn"
-            style={{
+            variant="contained"
+            sx={{
               backgroundColor: "#F9EF9F",
               color: "#2E1065",
+              borderRadius: "50px",
               padding: "6px 12px",
-              borderRadius: "20px",
-              marginLeft: "10px",
               fontWeight: "bold",
-              border: "none",
-              boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
-              cursor: "pointer",
+              textTransform: "capitalize",
+              "&:hover": {
+                backgroundColor: "#e8dd88",
+                transform: "scale(1.05)",
+              },
             }}
           >
             {isMale ? "Women" : "Men"}
-          </button>
+          </Button>
 
-          <button className="btn sign-in">Sign Up</button>
-          <button className="btn log-in">Log In</button>
-        </div>
-      </div>
-    </nav>
+          <Button
+            component={Link}
+            to="/profile"
+            variant="contained"
+            sx={{
+              backgroundColor: "#AFA8F0",
+              color: "#fff",
+              borderRadius: "20px",
+              padding: "6px 16px",
+              fontWeight: 600,
+              textTransform: "capitalize",
+              "&:hover": {
+                backgroundColor: "#9b94e0",
+              },
+            }}
+          >
+            Profile
+          </Button>
+
+          <Button
+            variant="contained"
+            onClick={scrollToSignUp}
+            sx={{
+              backgroundColor: "#e692c3",
+              color: "#FFF",
+              borderRadius: "50px",
+              padding: "8px 16px",
+              fontSize: "16px",
+              textTransform: "capitalize",
+              "&:hover": {
+                backgroundColor: "#b47399",
+                transform: "scale(1.05)",
+              },
+            }}
+          >
+            Sign Up
+          </Button>
+
+          <Button
+            variant="contained"
+            onClick={handleLoginClick}
+            sx={{
+              backgroundColor: "#9698d3",
+              color: "#FFF",
+              borderRadius: "50px",
+              padding: "8px 16px",
+              fontSize: "16px",
+              textTransform: "capitalize",
+              "&:hover": {
+                backgroundColor: "#7375a2",
+                transform: "scale(1.05)",
+              },
+            }}
+          >
+            Log In
+          </Button>
+        </Box>
+      </Toolbar>
+    </AppBar>
   );
 }
