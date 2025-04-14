@@ -1,4 +1,3 @@
-// src/Login.jsx
 import React, { useState } from "react";
 import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "./FirebaseConfig";
@@ -6,7 +5,7 @@ import { Box, Button, TextField, Typography } from "@mui/material";
 import GoogleIcon from "@mui/icons-material/Google";
 import { useNavigate } from "react-router-dom";
 
-const LoginPage = () => {
+const LoginPage = ({ setIsLoggedIn }) => {  // Accept setIsLoggedIn as a prop
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const navigate = useNavigate();
 
@@ -18,7 +17,8 @@ const LoginPage = () => {
     try {
       await signInWithEmailAndPassword(auth, loginData.email, loginData.password);
       alert("Login successful!");
-      navigate("/grid");
+      setIsLoggedIn(true);  // Update the logged-in state
+      navigate("/grid");  // Navigate to grid page after login
     } catch (error) {
       alert(error.message);
     }
@@ -28,7 +28,8 @@ const LoginPage = () => {
     try {
       await signInWithPopup(auth, googleProvider);
       alert("Logged in with Google!");
-      navigate("/grid");
+      setIsLoggedIn(true);  // Update the logged-in state
+      navigate("/grid");  // Navigate to grid page after Google login
     } catch (error) {
       alert(error.message);
     }
@@ -59,7 +60,7 @@ const LoginPage = () => {
         }}
       >
         <img
-          src="/PInfluence LOGO.png"
+          src="/PInfluence-logo.png"
           alt="Logo"
           style={{ height: 80, marginBottom: 5 }}
         />

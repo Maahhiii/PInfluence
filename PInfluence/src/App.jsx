@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"; 
+import React, { useState, useEffect } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -7,19 +7,18 @@ import {
   useLocation,
 } from "react-router-dom";
 import Grid from "./Grid";
-import Navbar from "./Navbar"; // Navbar for logged-in users
-import Navbarhome from "./Navbarhome"; // Navbar for homepage
+import Navbar from "./Navbar";
 import SearchPage from "./SearchPage";
 import clothesWomenData from "./data/clothesWomen";
 import clothesMenData from "./data/clothesMen";
 import "./App.css";
 import ProfilePage from './ProfilePage';
 import Chatbox from "./Chatbox";
-import Homepage from './Homepage/HomePage'; 
+import Homepage from "./Homepage/HomePage";
+import Navbarhome from "./Navbarhome";
 import LoginPage from "./LogIn";
- // Import your Homepage component
+import SignUpForm from "./Homepage/SignUp";
 
-// Helper function to shuffle cards
 function shuffleArray(array) {
   return array
     .map((value) => ({ value, sort: Math.random() }))
@@ -27,18 +26,25 @@ function shuffleArray(array) {
     .map(({ value }) => value);
 }
 
-function HomePage({ isMale }) {
+function HomePageGrid({ isMale }) {
   const cards = isMale ? clothesMenData : clothesWomenData;
-  const shuffledCards = shuffleArray(cards); // ✅ Shuffle the cards
-
+  const shuffledCards = shuffleArray(cards);
   return <Grid cards={shuffledCards} />;
+}
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
 }
 
 function AppWrapper() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isMale, setIsMale] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Track if the user is logged in
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -61,6 +67,27 @@ function AppWrapper() {
     setIsChatOpen(false);
   };
 
+  const goToSearchPage = () => {
+    if (isLoggedIn) {
+      navigate("/search");
+    } else {
+      navigate("/login");
+    }
+  };
+
+  const loadMore = () => {
+    console.log('Loading more items...');
+    setTimeout(() => {
+      const nextCards = shuffleCards(
+        cards.filter(card => !filter || card.category === filter)
+      ).slice(0, 15);
+      
+      setAllCards(prev => [...prev, ...nextCards]);
+      setVisibleCount(prev => prev + nextCards.length);
+    }, 800);
+  };
+  
+
   useEffect(() => {
     if (isChatOpen) {
       document.body.style.overflow = 'hidden'; // Prevent scroll
@@ -75,8 +102,9 @@ function AppWrapper() {
 
   return (
     <div className="App">
+
+      {/* Conditionally render Navbar based on the current location */}
       {location.pathname !== "/search" && (
-        // Render different navbar based on login status
         isLoggedIn ? (
           <Navbar
             onSearch={handleSearch}
@@ -90,17 +118,12 @@ function AppWrapper() {
       )}
 
       <Routes>
-        {/* Route to show homepage when not logged in */}
-        <Route
-          path="/"
-          element={isLoggedIn ? <HomePage isMale={isMale} /> : <Homepage />}
-        />
-        {/* Show Grid for logged-in users */}
-        <Route path="/grid" element={<HomePage isMale={isMale} />} />
+        <Route path="/" element={isLoggedIn ? <HomePageGrid isMale={isMale} /> : <Homepage />} />
+        <Route path="/grid" element={<HomePageGrid isMale={isMale} />} />
         <Route path="/search" element={<SearchPage searchTerm={searchTerm} isMale={isMale} />} />
         <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/login" element={<LoginPage />} />
-
+        <Route path="/login" element={<LoginPage setIsLoggedIn={setIsLoggedIn} />} />
+        <Route path="/signup" element={<SignUpForm setIsLoggedIn={setIsLoggedIn} />} />
       </Routes>
 
       {isChatOpen && (
@@ -119,6 +142,9 @@ function AppWrapper() {
             alignItems: 'center',
             justifyContent: 'center',
             overflow: 'hidden',
+            padding: 0,
+            margin: 0,             // 🔧 this too
+            borderRadius: '0px',   
           }}
           onClick={closeChat}
         >
@@ -126,12 +152,16 @@ function AppWrapper() {
             className="chatbox-modal"
             style={{
               position: 'relative',
-              width: '90%',
+              width: '100%',
               maxWidth: '1000px',
               maxHeight: '90vh',
-              borderRadius: '16px',
+              height: '90vh',
+              borderRadius: '20px', // 🔧 remove rounding
+              margin: 0,            // 🔧 remove spacing
+              padding: 0,
               overflow: 'hidden',
               zIndex: 1400,
+              backgroundColor: '#fff'
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -142,6 +172,8 @@ function AppWrapper() {
     </div>
   );
 }
+
+
 
 function App() {
   return (

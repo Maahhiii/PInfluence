@@ -41,7 +41,7 @@ export default function Navbar({ scrollToSignUp }) {
         {/* Logo (clickable) */}
         <Box
           component="img"
-          src="/PInfluence LOGO.png"
+          src="./PInfluence-logo.png"
           alt="Logo"
           onClick={handleLogoClick}
           sx={{

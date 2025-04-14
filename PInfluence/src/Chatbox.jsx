@@ -49,24 +49,21 @@ const Chatbox = ({ onClose }) => {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 50 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 50 }}
-      transition={{ duration: 0.4, ease: "easeInOut" }}
-      style={{
-        position: "relative",
-        
-        transform: "translate(-50%, -50%)",
-        height: "90vh",
-        width: "90vw",
-        maxWidth: "1000px",
-        zIndex: 9999,
-        display: "flex",
-        borderRadius: "20px",
-        backdropFilter: "blur(12px)",
-        backgroundColor: "rgba(255, 255, 255, 0.4)",
-        boxShadow: "0 8px 32px rgba(31, 38, 135, 0.2)"
-      }}
+    initial={{ opacity: 0, y: 50 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: 50 }}
+    transition={{ duration: 0.4, ease: "easeInOut" }}
+    style={{
+      position: "relative",
+      height: "100%", // ✅ changed from 100vh to 100%
+      width: "100%",
+      display: "flex",
+      borderRadius: "20px",
+      backdropFilter: "blur(12px)",
+      backgroundColor: "rgba(255, 255, 255, 0.4)",
+      boxShadow: "0 8px 32px rgba(31, 38, 135, 0.2)",
+    }}
+      
     >
       {/* Sidebar */}
       <Box

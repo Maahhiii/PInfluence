@@ -15,7 +15,7 @@ const SignUpForm = forwardRef((props, ref) => {
     try {
       await createUserWithEmailAndPassword(auth, formData.email, formData.password);
       alert("Sign-up successful!");
-      navigate("/grid");
+      navigate("/grid"); // Redirect to Grid.jsx
     } catch (error) {
       alert(error.message);
     }
@@ -25,7 +25,7 @@ const SignUpForm = forwardRef((props, ref) => {
     try {
       await signInWithPopup(auth, googleProvider);
       alert("Signed up with Google!");
-      navigate("/grid");
+      navigate("/grid"); // Redirect to Grid.jsx
     } catch (error) {
       alert(error.message);
     }
@@ -36,23 +36,17 @@ const SignUpForm = forwardRef((props, ref) => {
       ref={ref}
       sx={{
         display: "flex",
-        flexDirection: { xs: "column", md: "row" },
+        flexDirection: "row",
+        flexWrap: "wrap",
         gap: 4,
         width: "100%",
         justifyContent: "center",
         alignItems: "center",
         mt: 4,
-        p: 2,
-        backdropFilter: "blur(10px)",
-        background: "rgba(255, 255, 255, 0.6)",
-        borderRadius: 4,
-        boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
-        maxWidth: "1200px",
-        margin: "0 auto",
       }}
     >
-      {/* Left Side - Grid and CTA */}
-      <Box sx={{ flex: 1, minWidth: "280px", textAlign: "center" }}>
+      {/* Left Side - Image Grid and CTA */}
+      <Box sx={{ flex: 1, minWidth: "300px", maxWidth: "500px", textAlign: "center" }}>
         <Typography variant="h4" fontWeight="bold" mb={2} color="black">
           Sign up to get your ideas
         </Typography>
@@ -61,6 +55,7 @@ const SignUpForm = forwardRef((props, ref) => {
             display: "grid",
             gridTemplateColumns: "repeat(2, 1fr)",
             gap: 2,
+            mt: 2,
           }}
         >
           {[
@@ -74,77 +69,22 @@ const SignUpForm = forwardRef((props, ref) => {
               component="img"
               src={src}
               alt="grid"
-              sx={{
-                width: "100%",
-                height: "120px",
-                borderRadius: 3,
-                objectFit: "cover",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-              }}
+              sx={{ width: "100%", height: "120px", borderRadius: 2, objectFit: "cover" }}
             />
           ))}
         </Box>
       </Box>
 
       {/* Right Side - Form */}
-      <Box sx={{ flex: 1, minWidth: "280px", px: 2 }}>
+      <Box sx={{ flex: 1, minWidth: "300px", maxWidth: "400px" }}>
         <Typography variant="h5" fontWeight="bold" mb={2}>Create Account</Typography>
-        <TextField
-          fullWidth
-          label="Email"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-          margin="normal"
-          sx={{ backgroundColor: "#fff", borderRadius: 2 }}
-        />
-        <TextField
-          fullWidth
-          label="Password"
-          name="password"
-          type="password"
-          value={formData.password}
-          onChange={handleChange}
-          margin="normal"
-          sx={{ backgroundColor: "#fff", borderRadius: 2 }}
-        />
-        <TextField
-          fullWidth
-          type="date"
-          name="birthdate"
-          value={formData.birthdate}
-          onChange={handleChange}
-          margin="normal"
-          InputLabelProps={{ shrink: true }}
-          sx={{ backgroundColor: "#fff", borderRadius: 2 }}
-        />
-        <Button
-          fullWidth
-          variant="contained"
-          onClick={handleEmailSignUp}
-          sx={{
-            mt: 2,
-            backgroundColor: "#f77fb7",
-            borderRadius: "25px",
-            padding: "12px",
-            fontSize: "16px",
-            textTransform: "none",
-          }}
-        >
+        <TextField fullWidth label="Email" name="email" value={formData.email} onChange={handleChange} margin="normal" />
+        <TextField fullWidth label="Password" name="password" type="password" value={formData.password} onChange={handleChange} margin="normal" />
+        <TextField fullWidth type="date" name="birthdate" value={formData.birthdate} onChange={handleChange} margin="normal" InputLabelProps={{ shrink: true }} />
+        <Button fullWidth variant="contained" onClick={handleEmailSignUp} sx={{ mt: 2, backgroundColor: "#f44336", borderRadius: "25px", padding: "12px", fontSize: "16px" }}>
           Continue
         </Button>
-        <Button
-          fullWidth
-          variant="outlined"
-          onClick={handleGoogleSignUp}
-          sx={{
-            mt: 2,
-            borderRadius: "25px",
-            padding: "12px",
-            fontSize: "16px",
-            textTransform: "none",
-          }}
-        >
+        <Button fullWidth variant="outlined" onClick={handleGoogleSignUp} sx={{ mt: 2, borderRadius: "25px", padding: "12px", fontSize: "16px" }}>
           Sign Up with Google
         </Button>
       </Box>

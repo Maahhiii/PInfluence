@@ -9,7 +9,7 @@ const boards = [
   '/clothes_women/Img_database/c18.jpg',
   '/clothes_women/Img_database/c19.jpg',
   '/clothes_women/Img_database/p3.jpg',
-  '/clothes_women/Img_database/c19.jpg',
+  '/clothes_women/Img_database/c15.jpg',
   '/clothes_women/Img_database/c11.jpg',
   '/clothes_women/Img_database/c13.jpg',
   '/clothes_women/Img_database/c12.jpg',
@@ -45,9 +45,9 @@ const ProfilePage = () => {
       {/* Info & Actions */}
       <Box sx={{ mt: 8, textAlign: 'center', px: 2 }}>
         <Typography variant="h5" fontWeight={600} sx={{ color: '#1E1E1E' }}>
-          Your Name
+          Ananya Sharma
         </Typography>
-        <Typography sx={{ color: '#666' }}>@username</Typography>
+        <Typography sx={{ color: '#666' }}>@annie1016</Typography>
 
         <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center', gap: 2 }}>
           <Button variant="contained" startIcon={<EditIcon />} sx={{ bgcolor: '#FC9CE3', color: '#1E1E1E', borderRadius: '20px', px: 3 }}>

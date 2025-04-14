@@ -16,7 +16,7 @@ function Grid({ cards, filter }) {
   useEffect(() => {
     const filtered = filter ? cards.filter(card => card.category === filter) : cards;
     setAllCards(shuffleCards(filtered));
-    setVisibleCount(40);
+    setVisibleCount(250);
   }, [filter, cards]);
 
   const shuffleCards = (arr) => arr.slice().sort(() => 0.5 - Math.random());
@@ -82,4 +82,3 @@ function Grid({ cards, filter }) {
 }
 
 export default Grid;
-  
