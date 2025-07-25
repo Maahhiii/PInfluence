@@ -1,0 +1,47 @@
+@import "tailwindcss";
+
+
+/* src/App.css */
+html, body, #root {
+  height: 100%;
+  overflow: auto;
+}
+
+body {
+  
+  font-family: Arial, sans-serif;
+  /* background-color: white; */
+}
+
+.App {
+  padding: 0;
+}
+
+  .chatbox-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(30, 20, 50, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    backdrop-filter: blur(5px);
+  }
+
+  .chatbox-modal {
+    background-color: #fff;
+    border-radius: 20px;
+    padding: 20px;
+    max-width: 800px;
+    width: 90%;
+    max-height: 90%;
+    overflow-y: auto;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  }
+
+  body.modal-open {
+    overflow: hidden;
+  }
