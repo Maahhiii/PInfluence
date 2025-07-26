@@ -35,7 +35,7 @@ const initialChats = {
       sender: "Liam",
       text: "Yo, thinking of getting these sneakers. What do you think?",
       pin: {
-        image: "./public/clothes_men/img_database/s2.jpg",
+        image: "/clothes_men/Img_database/s2.jpg",
         title: "AirZoom Max Sneakers",
         link: "https://shop.com/airzoom-max",
       },
@@ -61,7 +61,7 @@ const initialChats = {
       sender: "Olivia",
       text: "OMG look at this bag!! I’m obsessed 😍",
       pin: {
-        image: "./public/clothes_women/img_database/p2.jpg",
+        image: "/clothes_women/Img_database/p2.jpg",
         title: "Vintage Leather Tote",
         link: "https://shop.com/vintage-tote",
       },
