@@ -31,6 +31,8 @@ import "./App.css";
 import clothesWomenData from "./data/clothesWomen";
 import clothesMenData from "./data/clothesMen";
 
+import { Analytics } from "@vercel/analytics/react";
+
 function shuffleArray(array) {
   return array
     .map((value) => ({ value, sort: Math.random() }))
@@ -120,9 +122,14 @@ function AppWrapper() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignUpForm />} />
         <Route path="/grid" element={<HomePageGrid isMale={isMale} />} />
-        <Route path="/search" element={<SearchPage query={searchQuery} isMale={isMale} />} />
+        <Route
+          path="/search"
+          element={<SearchPage query={searchQuery} isMale={isMale} />}
+        />
         <Route path="/profile" element={<ProfilePage />} />
       </Routes>
+
+      <Analytics />
     </>
   );
 }
