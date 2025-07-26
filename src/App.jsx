@@ -122,7 +122,6 @@ function AppWrapper() {
         <Route path="/grid" element={<HomePageGrid isMale={isMale} />} />
         <Route path="/search" element={<SearchPage query={searchQuery} isMale={isMale} />} />
         <Route path="/profile" element={<ProfilePage />} />
-        {/* Route no longer used to open modal */}
       </Routes>
     </>
   );
