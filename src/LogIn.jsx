@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import { useNavigate, Link } from "react-router-dom";
 
-const LoginPage = ({ setIsLoggedIn }) => {
+const LoginPage = () => {
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const navigate = useNavigate();
 
@@ -26,8 +26,7 @@ const LoginPage = ({ setIsLoggedIn }) => {
         loginData.password
       );
       alert("Login successful!");
-      setIsLoggedIn(true);
-      navigate("/grid");
+      navigate("/grid"); // ✅ Redirect after Firebase login
     } catch (error) {
       alert(error.message);
     }

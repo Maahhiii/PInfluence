@@ -10,6 +10,8 @@ import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import LogoutIcon from "@mui/icons-material/Logout";
 import Box from "@mui/material/Box";
+import { signOut } from "firebase/auth";
+import { auth } from "./FirebaseConfig";
 
 export default function Navbar({
   onSearch,
@@ -20,7 +22,6 @@ export default function Navbar({
 }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const navigate = useNavigate();
-  const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
@@ -34,11 +35,11 @@ export default function Navbar({
 
   const handleLogout = async () => {
     await signOut(auth);
-    navigate("/login");
+    navigate("/");
   };
 
   const goToSearchPage = () => {
-    onSearch(""); 
+    onSearch("");
     navigate("/search");
   };
 
@@ -60,6 +61,9 @@ export default function Navbar({
       {children}
     </Box>
   );
+
+  // 🔐 Don't render anything if user is not logged in
+  if (!user) return null;
 
   return (
     <AppBar
@@ -141,15 +145,13 @@ export default function Navbar({
             </IconButton>
           </Tooltip>
 
-          {user && (
-            <Tooltip title="Logout" arrow>
-              <IconButton onClick={handleLogout}>
-                <IconWrapper bg="#8C89C8">
-                  <LogoutIcon sx={{ color: "#fff" }} />
-                </IconWrapper>
-              </IconButton>
-            </Tooltip>
-          )}
+          <Tooltip title="Logout" arrow>
+            <IconButton onClick={handleLogout}>
+              <IconWrapper bg="#93B0AC">
+                <LogoutIcon sx={{ color: "#FFF" }} />
+              </IconWrapper>
+            </IconButton>
+          </Tooltip>
         </Box>
       </Toolbar>
     </AppBar>

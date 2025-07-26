@@ -144,7 +144,7 @@ const SearchPage = ({ searchTerm: initialSearchTerm = "", isMale }) => {
         >
           {/* 🏠 Home Icon */}
           <Home
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/grid")}
             sx={{
               fontSize: 28,
               color: "#FC9CE3",
