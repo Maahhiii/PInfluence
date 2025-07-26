@@ -35,7 +35,7 @@ const initialChats = {
       sender: "Liam",
       text: "Yo, thinking of getting these sneakers. What do you think?",
       pin: {
-        image: "/clothes_men/Img_database/s2.jpg",
+        image: "/clothes_men/img_database/s2.jpg",
         title: "AirZoom Max Sneakers",
         link: "https://shop.com/airzoom-max",
       },
