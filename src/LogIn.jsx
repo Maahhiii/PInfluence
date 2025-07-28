@@ -35,7 +35,7 @@ const LoginPage = () => {
   return (
     <Box
       sx={{
-        minHeight: "90vh",
+        minHeight: "91vh",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
