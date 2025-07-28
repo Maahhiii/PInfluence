@@ -1,6 +1,6 @@
 # PInfluence 
 
-A modern, Pinterest-inspired web application built with React+Vite. PInfluence lets users explore, share, and organize image-based content across a variety of categories — all with a clean, responsive interface.
+A modern, Pinterest-inspired web application built with React+Vite. PInfluence lets users explore, share, and organize image-based content across a variety of categories — all with a clean, responsive interface. You can take a quick look here: [PInfluence](https://p-influence.vercel.app/).
 
 ---
 
