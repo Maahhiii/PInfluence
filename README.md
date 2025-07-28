@@ -7,6 +7,7 @@ A modern, Pinterest-inspired web application built with React+Vite. PInfluence l
 ## Features
 
 - Browse image pins across categories (fashion, food, accessories, etc.)
+- AI-powered **automatic image tagging**: Tags for items are now auto-generated using AI to improve search accuracy and reduce manual effort
 - Search functionality to easily find relevant pins (e.g., "pink shoes")
 - Click to enlarge pins with several other options
 - Create personal boards to save your favorite pins
@@ -15,6 +16,17 @@ A modern, Pinterest-inspired web application built with React+Vite. PInfluence l
 - Share pins with friends and chat 
 - Fully responsive, modern UI 
 
+## Tech Stack
+
+| Category           | Tools / Libraries                                                    |
+|--------------------|----------------------------------------------------------------------|
+| **Frontend**        | React + Vite, Material UI |
+| **Database**    | Firebase |
+| **AI**  | Python, Hugging Face Transformers, BLIP (Image Captioning) |
+| **Image Handling**  | Pillow (PIL) |
+
+> **Note:** The AI tagging system will be made more robust in future iterations — including better object recognition, brand detection, and deeper fashion insights.
+
 ---
 
 ## Screenshots
@@ -22,6 +34,3 @@ A modern, Pinterest-inspired web application built with React+Vite. PInfluence l
 ![{FA397662-BF62-4B25-A91A-93661202A5AA}](https://github.com/user-attachments/assets/706469a8-24bf-410f-b72a-fec36378ce01)
 ![{B73D6EBA-5D79-4D77-9722-E7A1424F26B2}](https://github.com/user-attachments/assets/9dbe86df-7cfe-4809-8d34-c09a97893775)
 ![{2E363AFC-A803-4A02-B295-D5FD06C410F5}](https://github.com/user-attachments/assets/000ea0dc-1000-4fcc-8481-f26063f892a4)
-
-
-
