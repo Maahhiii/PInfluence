@@ -1,6 +1,6 @@
 # PInfluence 
 
-A modern, Pinterest-inspired web application built with React+Vite. PInfluence lets users explore, share, and organize image-based content across a variety of categories — all with a clean, responsive interface. You can take a quick look here: [PInfluence](https://p-influence.vercel.app/).
+A modern, Pinterest-inspired web application built with React+Vite. PInfluence lets users explore, share, and organize image-based content across a variety of categories, all with a clean, responsive interface. You can take a quick look here: [PInfluence](https://p-influence.vercel.app/).
 
 ---
 
@@ -25,7 +25,7 @@ A modern, Pinterest-inspired web application built with React+Vite. PInfluence l
 | **AI**  | Python, Hugging Face Transformers, BLIP (Image Captioning) |
 | **Image Handling**  | Pillow (PIL) |
 
-> **Note:** The AI tagging system will be made more robust in future iterations — including better object recognition, brand detection, and deeper fashion insights.
+> **Note:** The AI tagging system will be made more robust in future iterations, including better object recognition, brand detection, and deeper fashion insights.
 
 ---
 
