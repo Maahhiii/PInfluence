@@ -6,16 +6,10 @@ import {
   useLocation,
   useNavigate,
 } from "react-router-dom";
-
-// Firebase Auth
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./FirebaseConfig";
-
-// Components
 import Navbar from "./Navbar";
 import NavbarHome from "./Navbarhome";
-
-// Pages
 import Grid from "./Grid";
 import SearchPage from "./SearchPage";
 import ProfilePage from "./ProfilePage";
@@ -23,11 +17,7 @@ import Chatbox from "./Chatbox";
 import Homepage from "./Homepage/HomePage";
 import LoginPage from "./LogIn";
 import SignUpForm from "./SignUpPage";
-
-// CSS
 import "./App.css";
-
-// Gender-based data
 import clothesWomenData from "./data/clothesWomen";
 import clothesMenData from "./data/clothesMen";
 

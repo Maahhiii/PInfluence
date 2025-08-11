@@ -1,9 +1,8 @@
 // src/Homepage/SignUp.jsx
 import React, { useState, forwardRef } from "react";
-import { auth, googleProvider, db } from "./FirebaseConfig";
+import { auth, db } from "./FirebaseConfig";
 import {
   createUserWithEmailAndPassword,
-  signInWithPopup,
   updateProfile,
 } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
@@ -41,14 +40,12 @@ const SignUpForm = forwardRef((props, ref) => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  // Generate years (current year - 100 to current year - 13)
   const currentYear = new Date().getFullYear();
   const years = Array.from(
-    { length: 88 },
-    (_, i) => currentYear - 100 + i
-  ).reverse();
+    { length: 101 },
+    (_, i) => currentYear - i
+  );
 
-  // Months array
   const months = [
     "January",
     "February",
@@ -64,7 +61,6 @@ const SignUpForm = forwardRef((props, ref) => {
     "December",
   ];
 
-  // Generate days based on selected month and year
   const getDaysInMonth = (month, year) => {
     if (!month || !year) return 31;
     return new Date(year, month, 0).getDate();
@@ -81,38 +77,32 @@ const SignUpForm = forwardRef((props, ref) => {
   };
 
   const validateForm = () => {
-    // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
       setError("Please enter a valid email address");
       return false;
     }
 
-    // Password validation
     if (formData.password.length < 6) {
       setError("Password must be at least 6 characters long");
       return false;
     }
 
-    // Confirm password validation
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match");
       return false;
     }
 
-    // Name validation
     if (!formData.firstName.trim() || !formData.lastName.trim()) {
       setError("Please enter your first and last name");
       return false;
     }
 
-    // Birth date validation
     if (!formData.birthMonth || !formData.birthDay || !formData.birthYear) {
       setError("Please select your complete birth date");
       return false;
     }
 
-    // Age validation (must be at least 13 years old)
     const today = new Date();
     const birthDate = new Date(
       formData.birthYear,
@@ -160,7 +150,6 @@ const SignUpForm = forwardRef((props, ref) => {
     } catch (error) {
       console.error("Error saving user to Firestore:", error);
 
-      // Check if it's a permissions error
       if (error.code === "permission-denied") {
         throw new Error(
           "Permission denied. Please check Firestore security rules."
@@ -178,26 +167,22 @@ const SignUpForm = forwardRef((props, ref) => {
     setError("");
 
     try {
-      // Create user account
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         formData.email,
         formData.password
       );
 
-      // Update profile
       await updateProfile(userCredential.user, {
         displayName: `${formData.firstName} ${formData.lastName}`,
       });
 
-      // Save to Firestore
       await saveUserToFirestore(userCredential.user);
 
       navigate("/grid");
     } catch (error) {
       console.error("Sign-up error:", error);
 
-      // Handle specific Firebase Auth errors
       if (error.code === "auth/email-already-in-use") {
         setError(
           "This email is already registered. Please use a different email or try signing in."
@@ -235,7 +220,7 @@ const SignUpForm = forwardRef((props, ref) => {
         px: 2,
       }}
     >
-      {/* Left Side - Image Grid and CTA */}
+      {/* Left Side - Image Grid */}
       <Box
         sx={{
           flex: 1,
@@ -304,7 +289,7 @@ const SignUpForm = forwardRef((props, ref) => {
           mb={2}
           textAlign="center"
           color="text.primary"
-          sx={{ fontSize: "1.4rem" }} // smaller heading
+          sx={{ fontSize: "1.4rem" }} 
         >
           Create Account
         </Typography>
@@ -327,7 +312,7 @@ const SignUpForm = forwardRef((props, ref) => {
             value={formData.firstName}
             onChange={handleChange}
             variant="outlined"
-            size="small" // changed
+            size="small" 
             required
           />
           <TextField
@@ -337,7 +322,7 @@ const SignUpForm = forwardRef((props, ref) => {
             value={formData.lastName}
             onChange={handleChange}
             variant="outlined"
-            size="small" // changed
+            size="small" 
             required
           />
         </Box>
@@ -350,7 +335,7 @@ const SignUpForm = forwardRef((props, ref) => {
           value={formData.email}
           onChange={handleChange}
           variant="outlined"
-          size="small" // changed
+          size="small"
           sx={{ mb: 2 }}
           required
         />
@@ -363,7 +348,7 @@ const SignUpForm = forwardRef((props, ref) => {
           value={formData.password}
           onChange={handleChange}
           variant="outlined"
-          size="small" // changed
+          size="small" 
           sx={{ mb: 2 }}
           required
           InputProps={{
@@ -389,7 +374,7 @@ const SignUpForm = forwardRef((props, ref) => {
           value={formData.confirmPassword}
           onChange={handleChange}
           variant="outlined"
-          size="small" // changed
+          size="small" 
           sx={{ mb: 2 }}
           required
           InputProps={{
@@ -490,7 +475,7 @@ const SignUpForm = forwardRef((props, ref) => {
             backgroundColor: "#f44336",
             borderRadius: "25px",
             padding: "10px 0",
-            fontSize: "15px", // slightly smaller
+            fontSize: "15px", 
             fontWeight: "bold",
             textTransform: "none",
             "&:hover": {
@@ -503,33 +488,6 @@ const SignUpForm = forwardRef((props, ref) => {
         >
           {loading ? <CircularProgress size={22} color="inherit" /> : "Sign Up"}
         </Button>
-
-        {/* <Button
-          fullWidth
-          variant="outlined"
-          onClick={handleGoogleSignUp}
-          disabled={loading}
-          size="medium"
-          sx={{
-            borderRadius: "25px",
-            padding: "10px 0",
-            fontSize: "15px", // smaller
-            fontWeight: "bold",
-            textTransform: "none",
-            borderColor: "#4285f4",
-            color: "#4285f4",
-            "&:hover": {
-              borderColor: "#3367d6",
-              backgroundColor: "rgba(66, 133, 244, 0.04)",
-            },
-            "&:disabled": {
-              borderColor: "#ccc",
-              color: "#ccc",
-            },
-          }}
-        >
-          {loading ? <CircularProgress size={22} /> : "Sign Up with Google"}
-        </Button> */}
       </Box>
     </Box>
   );

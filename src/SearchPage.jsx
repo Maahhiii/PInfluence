@@ -45,7 +45,6 @@ const SearchPage = ({ searchTerm: initialSearchTerm = "", isMale }) => {
     if (searchInputRef.current) {
       searchInputRef.current.focus();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialSearchTerm]);
 
   const handleSearch = (term = searchTerm) => {
@@ -108,7 +107,7 @@ const SearchPage = ({ searchTerm: initialSearchTerm = "", isMale }) => {
         minHeight: "100vh",
         bgcolor: "#FFF6E3",
         color: "#1E1E1E",
-        overflowX: "hidden", // ✅ Fix overflow but allow vertical scroll
+        overflowX: "hidden", 
         px: { xs: 1.5, md: 3 },
       }}
     >
@@ -142,7 +141,7 @@ const SearchPage = ({ searchTerm: initialSearchTerm = "", isMale }) => {
             gap: 2,
           }}
         >
-          {/* 🏠 Home Icon */}
+          {/* Home Icon */}
           <Home
             onClick={() => navigate("/grid")}
             sx={{
@@ -157,7 +156,7 @@ const SearchPage = ({ searchTerm: initialSearchTerm = "", isMale }) => {
             }}
           />
 
-          {/* 🔍 Search TextField */}
+          {/* Search TextField */}
           <TextField
             fullWidth
             placeholder="Looking for something?"
@@ -221,7 +220,6 @@ const SearchPage = ({ searchTerm: initialSearchTerm = "", isMale }) => {
         </Box>
       </Box>
 
-      {/* Carousel or Search Results */}
       {showCarousel ? (
         <Box
           sx={{
@@ -229,7 +227,7 @@ const SearchPage = ({ searchTerm: initialSearchTerm = "", isMale }) => {
             display: "flex",
             justifyContent: "center",
             px: { xs: 2, md: 4 },
-            pb: 6, // ✅ Add bottom padding to prevent dots from getting cut
+            pb: 6, 
           }}
         >
           <Slider {...settings} style={{ width: "100%" }}>

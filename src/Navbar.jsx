@@ -62,7 +62,6 @@ export default function Navbar({
     </Box>
   );
 
-  // 🔐 Don't render anything if user is not logged in
   if (!user) return null;
 
   return (

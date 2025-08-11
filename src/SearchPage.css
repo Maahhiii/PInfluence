@@ -1,9 +1,7 @@
-/* Remove default dots */
 .slick-dots li button {
   display: none !important;
 }
 
-/* Use our heart instead */
 .custom-heart-dot {
   font-size: 20px;
   opacity: 0.4;
@@ -11,18 +9,15 @@
   cursor: pointer;
 }
 
-/* Active heart */
 .slick-dots li.slick-active .custom-heart-dot {
   transform: scale(1.2);
   opacity: 1;
 }
 
-/* Ensure padding doesn't overflow */
 * {
   box-sizing: border-box;
 }
 
-/* Prevent horizontal scroll from sneaky overflow */
 body {
   overflow-x: hidden;
   margin: 0;

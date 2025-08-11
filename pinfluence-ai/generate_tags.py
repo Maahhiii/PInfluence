@@ -5,9 +5,7 @@ import json
 import re
 
 def extract_tags(caption):
-    # Lowercase and split by space and punctuation
     words = re.findall(r'\b\w+\b', caption.lower())
-    # Remove very common or useless words
     stopwords = {"a", "the", "on", "with", "and", "in", "of", "for", "to", "is", "at"}
     tags = [word for word in words if word not in stopwords]
     return ", ".join(tags)

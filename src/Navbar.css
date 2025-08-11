@@ -1,4 +1,3 @@
-/* Navbar Styles */
 .navbar {
   background: linear-gradient(to right, #bddafb, #9b8df7);
   padding: 15px 20px;
@@ -9,13 +8,11 @@
   z-index: 1000;
 }
 
-/* Add a shadow effect when scrolled */
 .navbar.scrolled {
   background: linear-gradient(to right, #8bb3e9, #7a6cf5);
   box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.2);
 }
 
-/* Navbar Container */
 .nav-container {
   display: flex;
   align-items: center;
@@ -25,7 +22,6 @@
   transition: all 0.3s ease-in-out;
 }
 
-/* Logo and Branding */
 .logo {
   display: flex;
   align-items: center;
@@ -58,7 +54,6 @@
   color: #fefede;
 }
 
-/* Right Side: Buttons */
 .right-container {
   display: flex;
   align-items: center;
@@ -66,22 +61,21 @@
   margin-right: -30px;
 }
 
-/* Buttons */
 .btn {
-  padding: 11px 24px; /* Ensuring equal padding */
+  padding: 11px 24px;
   border: 2.5px solid;
   border-radius: 20px;
   font-weight: bold;
   font-size: 1rem;
   cursor: pointer;
   transition: all 0.3s ease-in-out;
-  min-width: 110px; /* Ensuring both buttons have the same width */
-  text-align: center; /* Ensures text is centered */
+  min-width: 110px; 
+  text-align: center; 
 }
 
 @keyframes fadeOut {
   0% {
-    box-shadow: 0 0 12px rgb(76, 75, 75); /* Adjust color and spread */
+    box-shadow: 0 0 12px rgb(76, 75, 75); 
   }
   100% {
     box-shadow: none;
@@ -92,7 +86,6 @@
   animation: fadeOut 3s forwards;
 }
 
-/* Sign-In Button */
 .sign-in {
   background: #4a90e2;
   color: white;
@@ -109,7 +102,6 @@
   outline:#4a90e2 ;
 }
 
-/* Log-In Button */
 .log-in {
   background: #ff2870;
   color: white;
@@ -127,7 +119,6 @@
   outline:#ff2870 ;
 }
 
-/* Responsive Design */
 @media (max-width: 768px) {
   .nav-container {
     flex-direction: row;

@@ -26,7 +26,7 @@ const LoginPage = () => {
         loginData.password
       );
       alert("Login successful!");
-      navigate("/grid"); // ✅ Redirect after Firebase login
+      navigate("/grid"); 
     } catch (error) {
       alert(error.message);
     }

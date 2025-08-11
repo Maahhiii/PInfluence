@@ -4,7 +4,7 @@ import React from 'react';
 function Card({ card, onClick }) {
   if (card.isFiller) {
     return (
-      <div className="card invisible h-[200px] w-full"></div> // or skeleton shimmer
+      <div className="card invisible h-[200px] w-full"></div> 
     );
   }
 

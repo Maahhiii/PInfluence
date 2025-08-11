@@ -26,7 +26,7 @@ const ProfilePage = () => {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      navigate('/login'); // Or replace with your actual login path
+      navigate('/login'); 
     } catch (error) {
       console.error('Error during logout:', error);
     }

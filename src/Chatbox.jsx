@@ -77,7 +77,7 @@ const Chatbox = ({ onClose }) => {
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
-    document.body.style.overflow = "hidden"; // disable background scroll
+    document.body.style.overflow = "hidden"; 
     scrollToBottom();
     return () => {
       document.body.style.overflow = "auto";
@@ -100,7 +100,7 @@ const Chatbox = ({ onClose }) => {
 
   return (
     <Box
-      onClick={onClose} // background click closes modal
+      onClick={onClose} 
       sx={{
         position: "fixed",
         top: 0,
@@ -115,7 +115,7 @@ const Chatbox = ({ onClose }) => {
       }}
     >
       <motion.div
-        onClick={(e) => e.stopPropagation()} // prevent close when modal is clicked
+        onClick={(e) => e.stopPropagation()} 
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}

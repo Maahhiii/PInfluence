@@ -45,7 +45,7 @@ export default function Navbar() {
           flexWrap: "wrap",
         }}
       >
-        {/* Logo (clickable) */}
+        {/* Logo */}
         <Box
           component="img"
           src="./PInfluence-logo.png"

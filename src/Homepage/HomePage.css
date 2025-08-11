@@ -5,7 +5,7 @@ body,
   margin: 0;
   padding: 0;
   width: 100vw;
-  scroll-behavior: smooth; /* Enable smooth scrolling */
+  scroll-behavior: smooth; 
   overflow-x: hidden;
   font-family: 'Arial', sans-serif;
 }
@@ -24,9 +24,9 @@ body,
   min-height: 70vh;
   padding: 20px;
   display: flex;
-  flex-direction: column; /* 👈 center content vertically */
-  justify-content: center; /* 👈 vertical center */
-  align-items: center;     /* 👈 horizontal center */
+  flex-direction: column; 
+  justify-content: center; 
+  align-items: center;     
 }
 
 .card-content {
@@ -49,7 +49,7 @@ body,
 
 .card-content h2 {
   font-size: 2.5rem;
-  font-family: 'Poppins', sans-serif; /* updated to match rotating font */
+  font-family: 'Poppins', sans-serif;
   margin-bottom: 1rem;
   color: black;
   text-align: center;
