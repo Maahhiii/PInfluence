@@ -5,7 +5,8 @@ import {
   createBoard,
   getUserBoards,
   addPinToBoard,
-  getBoardById
+  getBoardById,
+  removePinFromBoard
 } from "../controllers/boardController.js";
 
 const router = express.Router();
@@ -13,6 +14,7 @@ const router = express.Router();
 router.post("/create", protect, makeUploader("boardCovers", "cover"), createBoard);
 router.get("/", protect, getUserBoards);
 router.post("/:boardId/add-pin", protect, addPinToBoard);
+router.delete("/:boardId/pins", protect, removePinFromBoard);
 router.get("/:boardId", protect, getBoardById);
 
 export default router;

@@ -28,27 +28,34 @@ const ProfilePage = () => {
     email: "",
     avatar: null,
   });
-  const [newBoard, setNewBoard] = useState(null);
+  const [newBoard, setNewBoard] = useState({
+    name: "",
+    description: "",
+    cover: null,
+  });
+
   const navigate = useNavigate();
 
-  /* Fetch logged-in user */
+  // ✅ Fetch user and boards from backend
   useEffect(() => {
-    const fetchUser = async () => {
+    const fetchUserAndBoards = async () => {
       try {
         const token = localStorage.getItem("token");
-        if (!token) {
-          navigate("/login");
-          return;
-        }
+        if (!token) return navigate("/login");
 
-        const res = await axios.get("http://localhost:5000/api/users/profile", {
+        // 1️⃣ Get user info
+        const res = await axios.get("http://localhost:5000/api/users/me", {
           headers: { Authorization: `Bearer ${token}` },
         });
-
         setUser(res.data);
-        setBoards(res.data.boards || []);
+
+        // 2️⃣ Get boards for the user
+        const boardsRes = await axios.get("http://localhost:5000/api/boards", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setBoards(boardsRes.data || []);
       } catch (err) {
-        console.error("Error fetching user:", err);
+        console.error("Error fetching data:", err);
         localStorage.removeItem("token");
         navigate("/login");
       } finally {
@@ -56,38 +63,61 @@ const ProfilePage = () => {
       }
     };
 
-    fetchUser();
+    fetchUserAndBoards();
   }, [navigate]);
 
-  /* Logout */
+  // ✅ Logout
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    navigate("/login");
+    if (window.confirm("Are you sure you want to log out?")) {
+      localStorage.removeItem("token");
+      navigate("/login");
+    }
   };
 
-  /* Save edited profile */
+  // ✅ Save edited profile
   const handleSaveProfile = async () => {
     try {
       const token = localStorage.getItem("token");
-      const formData = new FormData();
-      formData.append("firstName", editData.firstName);
-      formData.append("lastName", editData.lastName);
-      formData.append("email", editData.email);
-      if (editData.avatar) formData.append("avatar", editData.avatar);
 
-      const res = await axios.put(
+      // 1️⃣ Update text fields
+      await axios.put(
         "http://localhost:5000/api/users/profile",
-        formData,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
+          firstName: editData.firstName,
+          lastName: editData.lastName,
+          email: editData.email,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
 
-      setUser(res.data);
+      // 2️⃣ Upload avatar if provided
+      if (editData.avatar) {
+        const formData = new FormData();
+        formData.append("avatar", editData.avatar);
+
+        await axios.post(
+          "http://localhost:5000/api/users/upload-profile-pic",
+          formData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+      }
+
+      // 3️⃣ Re-fetch updated user data
+      const updatedUser = await axios.get(
+        "http://localhost:5000/api/users/me",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      setUser(updatedUser.data);
       setIsEditOpen(false);
       alert("Profile updated successfully!");
     } catch (err) {
@@ -96,17 +126,20 @@ const ProfilePage = () => {
     }
   };
 
-  /* Add new board */
+  // ✅ Add new board
   const handleAddBoard = async () => {
-    if (!newBoard) return alert("Please upload an image.");
+    if (!newBoard.name || !newBoard.cover)
+      return alert("Please enter a name and upload an image.");
 
     try {
       const token = localStorage.getItem("token");
       const formData = new FormData();
-      formData.append("image", newBoard);
+      formData.append("name", newBoard.name);
+      formData.append("description", newBoard.description || "");
+      formData.append("cover", newBoard.cover); // matches backend field
 
       const res = await axios.post(
-        "http://localhost:5000/api/users/add-board",
+        "http://localhost:5000/api/boards/create",
         formData,
         {
           headers: {
@@ -116,17 +149,17 @@ const ProfilePage = () => {
         }
       );
 
-      setBoards(res.data.boards);
-      setNewBoard(null);
+      setBoards((prev) => [...prev, res.data]);
+      setNewBoard({ name: "", description: "", cover: null });
       setIsBoardModalOpen(false);
-      alert("Board added successfully!");
+      alert("Board created successfully!");
     } catch (err) {
       console.error(err);
-      alert("Error adding board.");
+      alert("Error creating board.");
     }
   };
 
-  if (loading) {
+  if (loading)
     return (
       <Box
         sx={{
@@ -139,7 +172,6 @@ const ProfilePage = () => {
         <CircularProgress />
       </Box>
     );
-  }
 
   if (!user) return null;
 
@@ -155,7 +187,11 @@ const ProfilePage = () => {
         }}
       >
         <Avatar
-          src={user.avatar ? `http://localhost:5000/${user.avatar}` : "/profile/avatar.png"}
+          src={
+            user.profilePic
+              ? `http://localhost:5000${user.profilePic}`
+              : "/profile/avatar.png"
+          }
           sx={{
             width: 120,
             height: 120,
@@ -170,10 +206,19 @@ const ProfilePage = () => {
 
       {/* Profile Info */}
       <Box sx={{ mt: 8, textAlign: "center", px: 2 }}>
-        <Typography variant="h5" fontWeight={600} sx={{ color: "#1E1E1E" }}>
+        <Typography variant="h5" fontWeight={600} color="#FC9CE3">
           {user.firstName} {user.lastName}
         </Typography>
-        <Typography sx={{ color: "#666" }}>@{user.email}</Typography>
+        <Typography color="text.secondary">@{user.email}</Typography>
+
+        <Box sx={{ display: "flex", justifyContent: "center", gap: 4, mt: 1 }}>
+          <Typography variant="body2" color="#FC9CE3">
+            <strong>{user.followers?.length || 0}</strong> Followers
+          </Typography>
+          <Typography variant="body2" color="#FC9CE3">
+            <strong>{user.following?.length || 0}</strong> Following
+          </Typography>
+        </Box>
 
         <Box sx={{ mt: 2, display: "flex", justifyContent: "center", gap: 2 }}>
           <Button
@@ -199,9 +244,7 @@ const ProfilePage = () => {
           </Button>
 
           <IconButton
-            onClick={() => {
-              if (confirm("Are you sure you want to log out?")) handleLogout();
-            }}
+            onClick={handleLogout}
             sx={{ bgcolor: "#AFA8F0", color: "white" }}
           >
             <LogoutIcon />
@@ -214,6 +257,7 @@ const ProfilePage = () => {
         <Typography variant="h6" color="#FC9CE3" fontWeight={600} mb={2}>
           Your Boards
         </Typography>
+
         <Box
           sx={{
             display: "grid",
@@ -226,7 +270,7 @@ const ProfilePage = () => {
             gap: 3,
           }}
         >
-          {boards.map((img, i) => (
+          {boards.map((board, i) => (
             <Box
               key={i}
               sx={{
@@ -237,10 +281,11 @@ const ProfilePage = () => {
                 transition: "transform 0.3s ease",
                 "&:hover": { transform: "scale(1.03)" },
               }}
+              onClick={() => navigate(`/board/${board._id}`)}
             >
               <img
-                src={`http://localhost:5000/${img}`}
-                alt={`board-${i}`}
+                src={`http://localhost:5000${board.coverImage}`}
+                alt={board.name}
                 style={{
                   width: "100%",
                   height: "260px",
@@ -248,6 +293,16 @@ const ProfilePage = () => {
                   borderRadius: "16px",
                 }}
               />
+              <Typography
+                sx={{
+                  textAlign: "center",
+                  mt: 1,
+                  fontWeight: 600,
+                  color: "#1E1E1E",
+                }}
+              >
+                {board.name}
+              </Typography>
             </Box>
           ))}
 
@@ -274,7 +329,7 @@ const ProfilePage = () => {
                 color: "#1E1E1E",
                 borderRadius: "20px",
                 px: 3,
-                fontWeight: "600",
+                fontWeight: 600,
               }}
             >
               Add Board
@@ -324,7 +379,6 @@ const ProfilePage = () => {
           <TextField
             fullWidth
             label="Email"
-            type="email"
             value={editData.email}
             onChange={(e) =>
               setEditData({ ...editData, email: e.target.value })
@@ -385,18 +439,39 @@ const ProfilePage = () => {
             Add New Board
           </Typography>
 
+          <TextField
+            fullWidth
+            label="Board Name"
+            value={newBoard.name}
+            onChange={(e) => setNewBoard({ ...newBoard, name: e.target.value })}
+            sx={{ mb: 2 }}
+          />
+          <TextField
+            fullWidth
+            label="Description"
+            multiline
+            rows={2}
+            value={newBoard.description}
+            onChange={(e) =>
+              setNewBoard({ ...newBoard, description: e.target.value })
+            }
+            sx={{ mb: 2 }}
+          />
+
           <Button
             variant="outlined"
             component="label"
             fullWidth
             sx={{ mb: 3, borderRadius: "20px", fontWeight: 600 }}
           >
-            Upload Image
+            Upload Cover Image
             <input
               hidden
               accept="image/*"
               type="file"
-              onChange={(e) => setNewBoard(e.target.files[0])}
+              onChange={(e) =>
+                setNewBoard({ ...newBoard, cover: e.target.files[0] })
+              }
             />
           </Button>
 

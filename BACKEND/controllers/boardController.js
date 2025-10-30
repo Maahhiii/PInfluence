@@ -48,9 +48,40 @@ export const addPinToBoard = async (req, res) => {
       await board.save();
     }
 
+    // Optionally populate pins before sending
+    await board.populate({
+      path: "pins",
+      populate: { path: "createdBy", select: "firstName lastName profilePic" }
+    }).execPopulate?.();
+
     res.json(board);
   } catch (err) {
     console.error("addPinToBoard error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// NEW: remove pin from board
+export const removePinFromBoard = async (req, res) => {
+  try {
+    const { boardId } = req.params;
+    const { pinId } = req.body;
+    const board = await Board.findById(boardId);
+    if (!board) return res.status(404).json({ message: "Board not found" });
+    if (board.createdBy.toString() !== req.user._id.toString()) return res.status(403).json({ message: "Not authorized" });
+
+    board.pins = board.pins.filter((p) => p.toString() !== pinId.toString());
+    await board.save();
+
+    // Optionally populate
+    await board.populate({
+      path: "pins",
+      populate: { path: "createdBy", select: "firstName lastName profilePic" }
+    }).execPopulate?.();
+
+    res.json(board);
+  } catch (err) {
+    console.error("removePinFromBoard error:", err);
     res.status(500).json({ message: "Server error" });
   }
 };
