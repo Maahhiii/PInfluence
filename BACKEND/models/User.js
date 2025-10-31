@@ -5,19 +5,24 @@ const userSchema = new mongoose.Schema(
   {
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
-    username: { type: String, required: false, unique: false },
+    username: { type: String },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     birthdate: { type: String },
-    profilePic: { type: String }, // path to uploads
-    followers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-    following: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    profilePic: { type: String },
+
     boards: [{ type: mongoose.Schema.Types.ObjectId, ref: "Board" }],
-    pins: [{ type: mongoose.Schema.Types.ObjectId, ref: "Pin" }]
+    pins: [{ type: mongoose.Schema.Types.ObjectId, ref: "Pin" }],
+
+    // ✅ Mutual Friends System
+    friends: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    friendRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }], // incoming
+    sentRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],   // outgoing
   },
   { timestamps: true }
 );
 
+// 🔐 Password encryption
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
   const salt = await bcrypt.genSalt(10);

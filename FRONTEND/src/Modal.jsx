@@ -44,7 +44,11 @@ function CustomModal({ isOpen, onClose, card }) {
   const [boards, setBoards] = useState(null); // null = loading, [] = none
   const [loadingBoards, setLoadingBoards] = useState(false);
   const [creatingBoard, setCreatingBoard] = useState(false);
-  const [newBoard, setNewBoard] = useState({ name: "", description: "", cover: null });
+  const [newBoard, setNewBoard] = useState({
+    name: "",
+    description: "",
+    cover: null,
+  });
   const [savingToBoardId, setSavingToBoardId] = useState(null);
 
   const friends = [
@@ -85,12 +89,16 @@ function CustomModal({ isOpen, onClose, card }) {
       fd.append("description", newBoard.description || "");
       if (newBoard.cover) fd.append("cover", newBoard.cover);
 
-      const res = await axios.post("http://localhost:5000/api/boards/create", fd, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const res = await axios.post(
+        "http://localhost:5000/api/boards/create",
+        fd,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
 
       // append to boards list and switch UI to show boards
       setBoards((prev) => (prev ? [res.data, ...prev] : [res.data]));
@@ -129,25 +137,62 @@ function CustomModal({ isOpen, onClose, card }) {
     }
   };
 
-  const sendToFriend = (friend) => {
-    console.log(`Message sent to ${friend.name}`);
-    setShowFriends(true);
-    setTimeout(() => {
-      friendIconsRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, 100);
+  const sendToFriend = async (friend) => {
+    if (!currentUser || !friend?._id) return;
+
+    try {
+      // 1️⃣ Save pin message via API
+      const token = localStorage.getItem("token");
+      const res = await axios.post(
+        "http://localhost:5000/api/chat/send",
+        {
+          receiverId: friend._id,
+          text: "Shared a pin with you!",
+          pin: {
+            image: card.image,
+            title: card.title || "Shared Pin",
+            link: card.shopLink || "#",
+          },
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      const savedMsg = res.data;
+
+      // 2️⃣ Emit via socket for real-time
+      socket.emit("send_message", {
+        receiverId: friend._id,
+        message: savedMsg,
+      });
+
+      // Optional: update local chat UI in Chatbox
+      window.dispatchEvent(
+        new CustomEvent("pin-sent", {
+          detail: { friendId: friend._id, message: savedMsg },
+        })
+      );
+
+      setShowFriends(false);
+      alert(`📌 Pin sent to ${friend.name}`);
+    } catch (err) {
+      console.error("📌 Error sending pin:", err);
+      alert("Failed to send pin");
+    }
   };
 
-  const SparkleHover = ({ children }) => (
+  const SparkleHover = React.forwardRef(({ children, ...props }, ref) => (
     <motion.div
+      ref={ref}
       whileHover={{
         scale: 1.05,
         transition: { type: "spring", stiffness: 300 },
       }}
       style={{ position: "relative" }}
+      {...props}
     >
       {children}
     </motion.div>
-  );
+  ));
 
   if (!isOpen || !card) return null;
 
@@ -175,8 +220,20 @@ function CustomModal({ isOpen, onClose, card }) {
           }}
         >
           {/* Iridescence */}
-          <Box sx={{ position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none" }}>
-            <Iridescence color={[255 / 255, 213 / 255, 194 / 255]} mouseReact={false} amplitude={0.1} speed={1.0} />
+          <Box
+            sx={{
+              position: "absolute",
+              inset: 0,
+              zIndex: 0,
+              pointerEvents: "none",
+            }}
+          >
+            <Iridescence
+              color={[255 / 255, 213 / 255, 194 / 255]}
+              mouseReact={false}
+              amplitude={0.1}
+              speed={1.0}
+            />
           </Box>
 
           {/* Close */}
@@ -187,7 +244,12 @@ function CustomModal({ isOpen, onClose, card }) {
           </Box>
 
           {/* Image & buttons */}
-          <Box display="flex" justifyContent="center" alignItems="center" flexDirection="column">
+          <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            flexDirection="column"
+          >
             <img
               src={card.image}
               alt="Pin"
@@ -202,14 +264,27 @@ function CustomModal({ isOpen, onClose, card }) {
               }}
             />
 
-            <Stack direction="row" spacing={1.5} mt={3} justifyContent="center" flexWrap="wrap" rowGap={2}>
+            <Stack
+              direction="row"
+              spacing={1.5}
+              mt={3}
+              justifyContent="center"
+              flexWrap="wrap"
+              rowGap={2}
+            >
               {/* Save Pin */}
               <Tooltip
                 title="Add to your board 💖"
                 arrow
                 placement="top"
                 componentsProps={{
-                  tooltip: { sx: { bgcolor: pastelColors[1], color: "black", fontWeight: 500 } },
+                  tooltip: {
+                    sx: {
+                      bgcolor: pastelColors[1],
+                      color: "black",
+                      fontWeight: 500,
+                    },
+                  },
                 }}
               >
                 <SparkleHover>
@@ -230,13 +305,26 @@ function CustomModal({ isOpen, onClose, card }) {
                 </SparkleHover>
               </Tooltip>
 
-              {/* Send */}
-              <Tooltip title="Send this pin to a friend 💌" arrow placement="top" componentsProps={{ tooltip: { sx: { bgcolor: pastelColors[0], color: "black", fontWeight: 500 } } }}>
+              {/* Send Button Section */}
+              <Tooltip
+                title="Send this pin to a friend 💌"
+                arrow
+                placement="top"
+                componentsProps={{
+                  tooltip: {
+                    sx: {
+                      bgcolor: pastelColors[0],
+                      color: "black",
+                      fontWeight: 500,
+                    },
+                  },
+                }}
+              >
                 <SparkleHover>
                   <Button
                     variant="contained"
                     startIcon={<SendIcon />}
-                    onClick={() => sendToFriend(friends[0])}
+                    onClick={() => setShowFriends((s) => !s)}
                     sx={{
                       backgroundColor: pastelColors[0],
                       "&:hover": { backgroundColor: "#9790e2" },
@@ -251,7 +339,20 @@ function CustomModal({ isOpen, onClose, card }) {
               </Tooltip>
 
               {/* Shop */}
-              <Tooltip title="Shop this look 🛍️" arrow placement="top" componentsProps={{ tooltip: { sx: { bgcolor: pastelColors[2], color: "black", fontWeight: 500 } } }}>
+              <Tooltip
+                title="Shop this look 🛍️"
+                arrow
+                placement="top"
+                componentsProps={{
+                  tooltip: {
+                    sx: {
+                      bgcolor: pastelColors[2],
+                      color: "black",
+                      fontWeight: 500,
+                    },
+                  },
+                }}
+              >
                 <SparkleHover>
                   <Button
                     variant="contained"
@@ -282,20 +383,26 @@ function CustomModal({ isOpen, onClose, card }) {
                   width: "100%",
                   maxWidth: 900,
                   zIndex: 2,
-                  background: "linear-gradient(135deg, rgba(175,168,240,0.12), rgba(252,156,227,0.12))",
+                  background:
+                    "linear-gradient(135deg, rgba(175,168,240,0.12), rgba(252,156,227,0.12))",
                   borderRadius: 2,
                   p: 2,
                   border: "1px solid rgba(255,255,255,0.08)",
                   boxShadow: "0 8px 30px rgba(0,0,0,0.25)",
                 }}
               >
-                <Typography variant="subtitle1" sx={{ mb: 1, color: "#fff", fontWeight: 600 }}>
+                <Typography
+                  variant="subtitle1"
+                  sx={{ mb: 1, color: "#fff", fontWeight: 600 }}
+                >
                   Save this Pin to:
                 </Typography>
 
                 {/* Loading state */}
                 {loadingBoards ? (
-                  <Box sx={{ display: "flex", justifyContent: "center", py: 2 }}>
+                  <Box
+                    sx={{ display: "flex", justifyContent: "center", py: 2 }}
+                  >
                     <CircularProgress size={28} />
                   </Box>
                 ) : (
@@ -318,7 +425,11 @@ function CustomModal({ isOpen, onClose, card }) {
                             }}
                           >
                             <img
-                              src={b.coverImage ? `http://localhost:5000${b.coverImage}` : (card.image || "/placeholder.png")}
+                              src={
+                                b.coverImage
+                                  ? `http://localhost:5000${b.coverImage}`
+                                  : card.image || "/placeholder.png"
+                              }
                               alt={b.name}
                               style={{
                                 width: "100%",
@@ -328,16 +439,25 @@ function CustomModal({ isOpen, onClose, card }) {
                                 marginBottom: 8,
                               }}
                             />
-                            <Typography sx={{ color: "#fff", fontWeight: 600, mb: 1 }}>{b.name}</Typography>
+                            <Typography
+                              sx={{ color: "#fff", fontWeight: 600, mb: 1 }}
+                            >
+                              {b.name}
+                            </Typography>
 
                             <Button
                               size="small"
                               variant="contained"
-                              sx={{ borderRadius: "20px", textTransform: "none" }}
+                              sx={{
+                                borderRadius: "20px",
+                                textTransform: "none",
+                              }}
                               onClick={() => addPinToBoardAPI(b._id)}
                               disabled={savingToBoardId === b._id}
                             >
-                              {savingToBoardId === b._id ? "Saving..." : "Save here"}
+                              {savingToBoardId === b._id
+                                ? "Saving..."
+                                : "Save here"}
                             </Button>
                           </Box>
                         ))}
@@ -367,8 +487,15 @@ function CustomModal({ isOpen, onClose, card }) {
                     ) : (
                       // No boards -> prompt to create
                       <Box sx={{ py: 2 }}>
-                        <Typography sx={{ color: "#fff", mb: 1 }}>You don't have any boards yet.</Typography>
-                        <Button variant="contained" startIcon={<AddIcon />} onClick={() => setCreatingBoard(true)} sx={{ borderRadius: "999px" }}>
+                        <Typography sx={{ color: "#fff", mb: 1 }}>
+                          You don't have any boards yet.
+                        </Typography>
+                        <Button
+                          variant="contained"
+                          startIcon={<AddIcon />}
+                          onClick={() => setCreatingBoard(true)}
+                          sx={{ borderRadius: "999px" }}
+                        >
                           Create your first board
                         </Button>
                       </Box>
@@ -378,11 +505,21 @@ function CustomModal({ isOpen, onClose, card }) {
 
                 {/* Create board inline */}
                 {creatingBoard && (
-                  <Box sx={{ mt: 2, display: "flex", gap: 2, flexDirection: { xs: "column", sm: "row" }, alignItems: "center" }}>
+                  <Box
+                    sx={{
+                      mt: 2,
+                      display: "flex",
+                      gap: 2,
+                      flexDirection: { xs: "column", sm: "row" },
+                      alignItems: "center",
+                    }}
+                  >
                     <TextField
                       placeholder="Board name"
                       value={newBoard.name}
-                      onChange={(e) => setNewBoard((p) => ({ ...p, name: e.target.value }))}
+                      onChange={(e) =>
+                        setNewBoard((p) => ({ ...p, name: e.target.value }))
+                      }
                       sx={{ background: "white", borderRadius: 1, flex: 1 }}
                       size="small"
                     />
@@ -396,7 +533,12 @@ function CustomModal({ isOpen, onClose, card }) {
                         hidden
                         accept="image/*"
                         type="file"
-                        onChange={(e) => setNewBoard((p) => ({ ...p, cover: e.target.files[0] }))}
+                        onChange={(e) =>
+                          setNewBoard((p) => ({
+                            ...p,
+                            cover: e.target.files[0],
+                          }))
+                        }
                       />
                     </Button>
                     <Button
@@ -412,73 +554,62 @@ function CustomModal({ isOpen, onClose, card }) {
               </Box>
             )}
 
-            {/* Friend list */}
+            {/* Friend list section */}
             {showFriends && (
               <Box
-                ref={friendIconsRef}
-                mt={11}
+                mt={5}
                 py={3}
-                px={2}
+                px={3}
                 sx={{
-                  background: "linear-gradient(135deg, rgba(175,168,240,0.2), rgba(252,156,227,0.2), rgba(255,213,194,0.2))",
-                  backdropFilter: "blur(14px)",
-                  border: "1.5px solid rgba(255, 255, 255, 0.2)",
-                  borderRadius: "24px",
-                  boxShadow: "0 6px 28px rgba(0, 0, 0, 0.2)",
-                  maxWidth: "960px",
-                  width: "100%",
-                  transition: "all 0.3s ease-in-out",
+                  background:
+                    "linear-gradient(135deg, rgba(175,168,240,0.25), rgba(252,156,227,0.25))",
+                  borderRadius: "20px",
+                  backdropFilter: "blur(12px)",
+                  border: "1px solid rgba(255,255,255,0.2)",
+                  boxShadow: "0 6px 20px rgba(0,0,0,0.15)",
                 }}
               >
                 <Typography
-                  variant="h6"
-                  sx={{
-                    fontSize: { xs: "1rem", sm: "1.25rem" },
-                    color: "#ffffff",
-                    fontWeight: 600,
-                    textAlign: "center",
-                    mb: 3,
-                    textShadow: "0 1px 3px rgba(0,0,0,0.3)",
-                  }}
+                  variant="subtitle1"
+                  sx={{ mb: 2, color: "#fff", fontWeight: 600 }}
                 >
-                  Send to:
+                  Send this pin to:
                 </Typography>
-
-                <Stack direction="row" spacing={3} justifyContent="center" flexWrap="wrap" rowGap={2}>
-                  {friends.map((friend, index) => (
-                    <motion.div
-                      whileHover={{
-                        scale: 1.07,
-                        transition: { type: "spring", stiffness: 300 },
-                      }}
-                      key={index}
-                      style={{ cursor: "pointer", textAlign: "center" }}
+                <Stack
+                  direction="row"
+                  spacing={2}
+                  justifyContent="center"
+                  flexWrap="wrap"
+                >
+                  {friends.map((friend) => (
+                    <Box
+                      key={friend._id}
                       onClick={() => sendToFriend(friend)}
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        cursor: "pointer",
+                        p: 1.5,
+                        borderRadius: "12px",
+                        transition: "all 0.3s ease",
+                        "&:hover": {
+                          backgroundColor: "rgba(255,255,255,0.15)",
+                          transform: "scale(1.05)",
+                        },
+                      }}
                     >
                       <Avatar
                         src={friend.avatar}
-                        alt={friend.name}
-                        sx={{
-                          width: { xs: 48, sm: 64 },
-                          height: { xs: 48, sm: 64 },
-                          mx: "auto",
-                          border: "2px solid white",
-                          borderRadius: "999px",
-                          boxShadow: `0 0 12px ${pastelColors[index % pastelColors.length]}`,
-                        }}
+                        sx={{ width: 56, height: 56 }}
                       />
                       <Typography
-                        variant="body2"
                         mt={1}
-                        sx={{
-                          color: pastelColors[index % pastelColors.length],
-                          fontWeight: 500,
-                          textShadow: "0 1px 1px rgba(0,0,0,0.1)",
-                        }}
+                        sx={{ color: "#fff", fontWeight: 500 }}
                       >
-                        {friend.name}
+                        {friend.firstName} {friend.lastName || ""}
                       </Typography>
-                    </motion.div>
+                    </Box>
                   ))}
                 </Stack>
               </Box>

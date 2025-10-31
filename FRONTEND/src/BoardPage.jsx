@@ -10,7 +10,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
-import CustomModal from "./Modal"; // ✅ your existing modal
+import Modal from "./BoardModal"; // ✅ your existing modal
 
 const BoardPage = () => {
   const { id } = useParams();
@@ -19,6 +19,7 @@ const BoardPage = () => {
   const [pins, setPins] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedPin, setSelectedPin] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // 🧩 Fetch board + pins
   useEffect(() => {
@@ -38,6 +39,13 @@ const BoardPage = () => {
     };
     fetchBoard();
   }, [id]);
+
+  /* ✅ Card click handling */
+  const handleCardClick = (pin) => {
+    setSelectedPin(pin);
+    setIsModalOpen(true);
+  };
+  const closeModal = () => setIsModalOpen(false);
 
   // 🗑 Remove pin
   const handleRemovePin = async (pinId) => {
@@ -148,17 +156,23 @@ const BoardPage = () => {
                 "&:hover": { transform: "scale(1.03)" },
                 cursor: "pointer",
               }}
+              onClick={() => handleCardClick(pin)} 
             >
               <img
-                src={`http://localhost:5000${pin.image}`}
-                alt={pin.title}
+                src={
+                  pin.image?.startsWith("http")
+                    ? pin.image
+                    : `http://localhost:5000${pin.image}`
+                }
+                alt={pin.title || "Pin"}
                 style={{
                   width: "100%",
-                  height: "220px",
+                  height: "auto",
                   objectFit: "cover",
+                  borderRadius: "14px",
                 }}
-                onClick={() => setSelectedPin(pin)}
               />
+
               <IconButton
                 onClick={(e) => {
                   e.stopPropagation();
@@ -208,14 +222,7 @@ const BoardPage = () => {
         <AddIcon sx={{ color: "white" }} />
       </Fab>
 
-      {/* 🔍 Custom Modal */}
-      {selectedPin && (
-        <CustomModal
-          open={!!selectedPin}
-          onClose={() => setSelectedPin(null)}
-          pin={selectedPin}
-        />
-      )}
+      <Modal isOpen={isModalOpen} onClose={closeModal} card={selectedPin} />
     </Box>
   );
 };

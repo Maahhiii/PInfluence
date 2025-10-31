@@ -21,6 +21,7 @@ const ProfilePage = () => {
   const [boards, setBoards] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [friendsCount, setFriendsCount] = useState(0);
   const [isBoardModalOpen, setIsBoardModalOpen] = useState(false);
   const [editData, setEditData] = useState({
     firstName: "",
@@ -48,6 +49,19 @@ const ProfilePage = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
         setUser(res.data);
+
+        // 2️⃣ Get friends count
+        try {
+          const friendsRes = await axios.get(
+            `http://localhost:5000/api/users/friends/${res.data._id}`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+          setFriendsCount(friendsRes.data?.length || 0);
+        } catch (err) {
+          console.error("Error fetching friends:", err);
+        }
 
         // 2️⃣ Get boards for the user
         const boardsRes = await axios.get("http://localhost:5000/api/boards", {
@@ -213,10 +227,8 @@ const ProfilePage = () => {
 
         <Box sx={{ display: "flex", justifyContent: "center", gap: 4, mt: 1 }}>
           <Typography variant="body2" color="#FC9CE3">
-            <strong>{user.followers?.length || 0}</strong> Followers
-          </Typography>
-          <Typography variant="body2" color="#FC9CE3">
-            <strong>{user.following?.length || 0}</strong> Following
+            <strong>{friendsCount}</strong>{" "}
+            {friendsCount === 1 ? "Friend" : "Friends"}
           </Typography>
         </Box>
 

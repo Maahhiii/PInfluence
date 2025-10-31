@@ -1,3 +1,4 @@
+// --- below imports ---
 import React, { useState, useEffect } from "react";
 import Masonry from "react-masonry-css";
 import InfiniteScroll from "react-infinite-scroll-component";
@@ -8,7 +9,9 @@ import "./Grid.css";
 import { Box, Typography, Fade } from "@mui/material";
 import axios from "axios";
 
-function Grid({ isMale: genderProp }) {
+function Grid(props) {
+  const { isMale: genderProp, onChatClick } = props;
+
   const [pins, setPins] = useState([]);
   const [visiblePins, setVisiblePins] = useState([]);
   const [selectedPin, setSelectedPin] = useState(null);
@@ -17,18 +20,44 @@ function Grid({ isMale: genderProp }) {
   const [user, setUser] = useState(null);
   const [isMale, setIsMale] = useState(genderProp ?? true);
 
+  // ✅ NEW: for sharing mode
+  const [shareMode, setShareMode] = useState(false);
+  const [friends, setFriends] = useState([]);
+
   /* ✅ Load logged-in user */
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) setUser(JSON.parse(storedUser));
   }, []);
 
-  /* ✅ Fetch data exactly as in MongoDB */
+  /* ✅ Fetch friends (actual backend route fix) */
+  useEffect(() => {
+    const fetchFriends = async () => {
+      if (!user?._id) return;
+      try {
+        const token = localStorage.getItem("token");
+        const res = await axios.get(
+          `http://localhost:5000/api/users/friends/${user._id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        setFriends(res.data || []);
+      } catch (err) {
+        console.error("Error fetching friends:", err);
+      }
+    };
+
+    fetchFriends();
+  }, [user]);
+
+  /* ✅ Fetch pins from backend */
   useEffect(() => {
     const fetchPins = async () => {
       try {
         const { data } = await axios.get("http://localhost:5000/api/pins");
-        // Ensure images use the same path stored in DB
         const normalized = data.map((pin) => ({
           ...pin,
           image: pin.image.startsWith("http")
@@ -45,7 +74,7 @@ function Grid({ isMale: genderProp }) {
     fetchPins();
   }, []);
 
-  /* ✅ Filter strictly by gender (no shuffle, no reordering) */
+  /* ✅ Filter by gender */
   useEffect(() => {
     if (pins.length > 0) {
       const category = isMale ? "men" : "women";
@@ -58,7 +87,7 @@ function Grid({ isMale: genderProp }) {
     }
   }, [pins, isMale]);
 
-  /* ✅ Infinite scroll: append same set for preview illusion */
+  /* ✅ Infinite scroll illusion */
   const loadMore = () => {
     setTimeout(() => {
       const category = isMale ? "men" : "women";
@@ -71,7 +100,7 @@ function Grid({ isMale: genderProp }) {
     }, 600);
   };
 
-  /* ✅ Card click handling */
+  /* ✅ Handle pin click */
   const handleCardClick = (pin) => {
     setSelectedPin(pin);
     setIsModalOpen(true);
@@ -80,6 +109,33 @@ function Grid({ isMale: genderProp }) {
 
   /* ✅ Gender toggle */
   const handleToggleGender = () => setIsMale((prev) => !prev);
+
+  /* ✅ NEW: handle share pin */
+  const handleSharePin = (pin) => {
+    setSelectedPin(pin);
+    setShareMode(true);
+  };
+
+  /* ✅ Send selected pin to chosen friend (corrected to pass full friend object) */
+  const sendPinToFriend = (friend) => {
+    const event = new CustomEvent("send-pin", {
+      detail: {
+        friend: {
+          _id: friend._id,
+          name: `${friend.firstName} ${friend.lastName || ""}`,
+          profilePic: friend.profilePic,
+        },
+        pin: {
+          _id: card._id,
+          image: card.image,
+          title: card.title || "Shared Pin",
+          shopLink: card.shopLink || "#",
+        },
+      },
+    });
+    window.dispatchEvent(event);
+    setShowFriends(false);
+  };
 
   const breakpointColumnsObj = {
     default: 6,
@@ -98,7 +154,12 @@ function Grid({ isMale: genderProp }) {
 
   return (
     <>
-      <Navbar onToggleGender={handleToggleGender} isMale={isMale} user={user} />
+      <Navbar
+        onToggleGender={handleToggleGender}
+        isMale={isMale}
+        user={user}
+        onChatClick={onChatClick}
+      />
 
       <div className="grid-wrapper">
         <InfiniteScroll
@@ -121,13 +182,13 @@ function Grid({ isMale: genderProp }) {
             columnClassName="masonry-grid_column"
           >
             {visiblePins.map((pin) => (
-              <Fade
-                in={true}
-                timeout={600}
-                key={pin._id}
-              >
+              <Fade in={true} timeout={600} key={pin._id}>
                 <Box>
-                  <Card card={pin} onClick={handleCardClick} />
+                  <Card
+                    card={pin}
+                    onClick={() => handleCardClick(pin)}
+                    onShare={() => handleSharePin(pin)} // 👈 share button inside card
+                  />
                 </Box>
               </Fade>
             ))}
@@ -135,6 +196,57 @@ function Grid({ isMale: genderProp }) {
         </InfiniteScroll>
 
         <Modal isOpen={isModalOpen} onClose={closeModal} card={selectedPin} />
+
+        {/* ✅ Share Overlay */}
+        {shareMode && (
+          <Box
+            sx={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              width: "100vw",
+              height: "100vh",
+              bgcolor: "rgba(0,0,0,0.5)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 2000,
+            }}
+            onClick={() => setShareMode(false)}
+          >
+            <Box
+              onClick={(e) => e.stopPropagation()}
+              sx={{
+                bgcolor: "#fff",
+                borderRadius: "16px",
+                p: 3,
+                minWidth: "300px",
+              }}
+            >
+              <Typography variant="h6" sx={{ mb: 2 }}>
+                Send pin to a friend
+              </Typography>
+              {friends.length === 0 ? (
+                <Typography>No friends found 😢</Typography>
+              ) : (
+                friends.map((f) => (
+                  <Box
+                    key={f._id}
+                    sx={{
+                      p: 1.5,
+                      borderRadius: "10px",
+                      cursor: "pointer",
+                      "&:hover": { bgcolor: "#f3f3f3" },
+                    }}
+                    onClick={() => sendPinToFriend(f)}
+                  >
+                    {f.firstName} {f.lastName}
+                  </Box>
+                ))
+              )}
+            </Box>
+          </Box>
+        )}
       </div>
     </>
   );
