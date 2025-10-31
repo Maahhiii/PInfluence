@@ -230,3 +230,15 @@ export const addBoardToUser = async (req, res) => {
   }
 };
 
+// ✅ Get all users (excluding self)
+export const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find({ _id: { $ne: req.user._id } })
+      .select("firstName lastName email profilePic sentRequests friendRequests friends");
+
+    res.json(users);
+  } catch (err) {
+    console.error("getAllUsers error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};

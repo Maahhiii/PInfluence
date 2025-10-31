@@ -15,30 +15,14 @@ io.on("connection", (socket) => {
   });
 
   // Handle send_message (text or pin)
-  socket.on("send_message", async ({ receiverId, message }) => {
-    try {
-      // Save to DB
-      const saved = await Message.create({
-        sender: message.senderId,
-        receiver: receiverId,
-        text: message.text || "",
-        pin: message.pin || null, // ⚡ Save pin object if exists
-      });
+  socket.on("send_message", ({ receiverId, message }) => {
+    // Message already saved by REST API ✅
 
-      // Emit to receiver
-      io.to(receiverId).emit("receive_message", {
-        ...saved.toObject(),
-        senderId: message.senderId,
-      });
+    // Send to receiver
+    io.to(receiverId).emit("receive_message", message);
 
-      // Optionally emit to sender to confirm delivery
-      io.to(message.senderId).emit("receive_message", {
-        ...saved.toObject(),
-        senderId: message.senderId,
-      });
-    } catch (err) {
-      console.error("💥 socket send_message error:", err);
-    }
+    // Send to sender (delivery confirm)
+    io.to(message.sender).emit("receive_message", message);
   });
 
   socket.on("disconnect", () => {

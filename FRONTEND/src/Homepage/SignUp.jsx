@@ -134,7 +134,7 @@ const SignUpForm = forwardRef((props, ref) => {
         "0"
       )}-${String(formData.birthDay).padStart(2, "0")}`;
 
-      const response = await axios.post("http://localhost:5000/api/users/register", {
+      const response = await axios.post("http://localhost:5000/api/auth/signup", {
         firstName: formData.firstName,
         lastName: formData.lastName,
         email: formData.email,

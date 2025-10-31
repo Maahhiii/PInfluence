@@ -41,6 +41,7 @@ const LoginPage = ({ setUser }) => {
       setUser(data);
       localStorage.setItem("user", JSON.stringify(data.user));
       localStorage.setItem("token", data.token);
+      localStorage.setItem("sessionStart", Date.now());
 
       console.log("✅ User set:", data.user);
 

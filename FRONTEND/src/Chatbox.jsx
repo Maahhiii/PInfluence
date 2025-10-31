@@ -10,7 +10,7 @@ import {
 import { Send, EmojiEmotions } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import CloseIcon from "@mui/icons-material/Close";
-import CustomModal from "./Modal";
+import CustomModal from "./Modal"; // keep same filename as your project expects
 import socket from "./socket";
 import axios from "axios";
 
@@ -24,15 +24,11 @@ const Chatbox = ({ onClose }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const messagesEndRef = useRef(null);
 
-  // ✅ Helper: Axios instance with auth header
   const api = axios.create({
     baseURL: "http://localhost:5000/api",
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-    },
+    headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
   });
 
-  // ✅ Fetch logged-in user
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -50,14 +46,14 @@ const Chatbox = ({ onClose }) => {
     fetchUser();
   }, []);
 
-  // ✅ Load user’s friends once we have currentUser
   useEffect(() => {
     if (!currentUser?._id) return;
     const loadFriends = async () => {
       try {
         const res = await api.get(`/users/friends/${currentUser._id}`);
-        setFriends(res.data);
-        if (res.data.length > 0) setSelectedFriend(res.data[0]);
+        // ensure array
+        setFriends(res.data || []);
+        if (res.data && res.data.length > 0) setSelectedFriend(res.data[0]);
       } catch (err) {
         console.error(
           "❌ Error fetching friends:",
@@ -68,11 +64,16 @@ const Chatbox = ({ onClose }) => {
     loadFriends();
   }, [currentUser]);
 
-  // ✅ Receive messages from socket
+  useEffect(() => {
+    console.log("Friends from chatbox:", friends);
+  }, [friends]);
+
+  // socket incoming message handler
   useEffect(() => {
     const handleReceive = (msg) => {
-      console.log("📩 Received:", msg);
-      const senderId = msg.senderId;
+      console.log("📩 Received (socket):", msg);
+      const senderId = msg.senderId || msg.sender || msg.senderId;
+      if (!senderId) return;
       setChats((prev) => ({
         ...prev,
         [senderId]: [...(prev[senderId] || []), msg],
@@ -89,10 +90,7 @@ const Chatbox = ({ onClose }) => {
     const fetchHistory = async () => {
       try {
         const res = await api.get(`/chat/${selectedFriend._id}`);
-        setChats((prev) => ({
-          ...prev,
-          [selectedFriend._id]: res.data,
-        }));
+        setChats((prev) => ({ ...prev, [selectedFriend._id]: res.data || [] }));
       } catch (err) {
         console.error("❌ Error fetching chat history:", err);
       }
@@ -100,32 +98,19 @@ const Chatbox = ({ onClose }) => {
     fetchHistory();
   }, [selectedFriend]);
 
-  // ✅ Scroll to bottom
-  const scrollToBottom = () => {
+  const scrollToBottom = () =>
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
 
-  // ✅ Send message
   const handleSendMessage = async () => {
     if (!message.trim() || !selectedFriend || !currentUser) return;
-
-    const msgPayload = {
-      receiverId: selectedFriend._id,
-      text: message.trim(),
-    };
-
+    const msgPayload = { receiverId: selectedFriend._id, text: message.trim() };
     try {
-      // Save to backend
       const res = await api.post("/chat/send", msgPayload);
       const savedMsg = res.data;
-
-      // Emit via socket
       socket.emit("send_message", {
         receiverId: selectedFriend._id,
         message: savedMsg,
       });
-
-      // Update local UI
       setChats((prev) => ({
         ...prev,
         [selectedFriend._id]: [...(prev[selectedFriend._id] || []), savedMsg],
@@ -133,49 +118,70 @@ const Chatbox = ({ onClose }) => {
     } catch (err) {
       console.error("Send message error:", err);
     }
-
     setMessage("");
     scrollToBottom();
   };
 
-  // Handle shared pin messages fully real-time
+  // LISTEN FOR share-pin events (dispatched by Modal or Grid)
   useEffect(() => {
     const handlePinSend = async (e) => {
-      const { friend, pin } = e.detail;
-      if (!currentUser || !friend) return;
+      const detail = e.detail || {};
+      const friendId = detail.friendId;
+      const pin = detail.pin; // ✅ Get the pin object here
+
+      if (!friendId || !pin) {
+        console.warn("send-pin event missing data:", detail);
+        return;
+      }
+
+      if (!currentUser) {
+        console.warn("No currentUser - cannot send pin");
+        return;
+      }
+
+      console.log("📌 Pin received in Chatbox to send →", detail);
 
       try {
-        // 1️⃣ Save pin message via API
         const res = await api.post("/chat/send", {
-          receiverId: friend._id,
+          receiverId: friendId,
           text: "Shared a pin with you!",
-          pin,
+          pin: pin, // ✅ pass the pin object correctly
         });
+
         const savedMsg = res.data;
 
-        // 2️⃣ Emit via socket
         socket.emit("send_message", {
-          receiverId: friend._id,
-          message: savedMsg,
+          receiverId: friendId,
+          message: {
+            ...savedMsg,
+            senderId: currentUser._id, // ✅ ensures compatibility
+          },
         });
 
-        // 3️⃣ Update local chat UI for sender
         setChats((prev) => ({
           ...prev,
-          [friend._id]: [...(prev[friend._id] || []), savedMsg],
+          [friendId]: [...(prev[friendId] || []), savedMsg],
         }));
 
+        if (!selectedFriend || selectedFriend._id !== friendId) {
+          const f = friends.find((x) => (x._id || x.id) === friendId);
+          if (f) setSelectedFriend(f);
+        }
+
         scrollToBottom();
+        console.log("✅ Pin sent and local chat updated", savedMsg);
       } catch (err) {
-        console.error("📌 Error sending pin:", err);
+        console.error(
+          "📌 Error sending pin from handler:",
+          err.response?.data || err.message || err
+        );
       }
     };
 
     window.addEventListener("send-pin", handlePinSend);
     return () => window.removeEventListener("send-pin", handlePinSend);
-  }, [friends, currentUser]);
+  }, [friends, currentUser, selectedFriend]);
 
-  // ✅ Prevent background scroll
   useEffect(() => {
     document.body.style.overflow = "hidden";
     return () => (document.body.style.overflow = "auto");
@@ -186,16 +192,11 @@ const Chatbox = ({ onClose }) => {
       <Box
         sx={{
           position: "fixed",
-          top: 0,
-          left: 0,
-          width: "100vw",
-          height: "100vh",
-          bgcolor: "rgba(0,0,0,0.3)",
+          inset: 0,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           color: "white",
-          fontSize: "18px",
           zIndex: 1400,
         }}
       >
@@ -211,7 +212,7 @@ const Chatbox = ({ onClose }) => {
           onClose={() => setShowModal(false)}
           card={modalPin}
           currentUser={currentUser}
-          friends={friends} // ⚡ pass friends with _id
+          friends={friends}
         />
       )}
 
@@ -241,7 +242,7 @@ const Chatbox = ({ onClose }) => {
             display: "flex",
             borderRadius: "20px",
             backdropFilter: "blur(10px)",
-            backgroundColor: "rgba(255, 255, 255, 0.4)",
+            backgroundColor: "rgba(255,255,255,0.4)",
             boxShadow: "0 8px 32px rgba(31, 38, 135, 0.2)",
             overflow: "hidden",
           }}
@@ -262,13 +263,12 @@ const Chatbox = ({ onClose }) => {
             </Typography>
             <Stack spacing={2}>
               {friends.map((friend) => {
-                const fullName =
-                  friend.firstName +
-                  " " +
-                  (friend.lastName ? friend.lastName : "");
+                const fullName = `${friend.firstName || friend.name || ""} ${
+                  friend.lastName || ""
+                }`.trim();
                 return (
                   <Box
-                    key={friend._id}
+                    key={friend._id || friend.id}
                     onClick={() => setSelectedFriend(friend)}
                     sx={{
                       p: 1.5,
@@ -278,14 +278,19 @@ const Chatbox = ({ onClose }) => {
                       alignItems: "center",
                       gap: 1.5,
                       bgcolor:
-                        selectedFriend?._id === friend._id
+                        selectedFriend?._id === (friend._id || friend.id)
                           ? "#C6E7FF"
                           : "transparent",
                       "&:hover": { bgcolor: "#D8F1FF" },
                     }}
                   >
-                    <Avatar sx={{ bgcolor: "#FFF6E3", color: "#333" }} />
-                    <Typography fontWeight="bold">{fullName}</Typography>
+                    <Avatar
+                      src={friend.profilePic || undefined}
+                      sx={{ bgcolor: "#FFF6E3", color: "#333" }}
+                    />
+                    <Typography fontWeight="bold">
+                      {fullName || "Unknown"}
+                    </Typography>
                   </Box>
                 );
               })}
@@ -301,7 +306,6 @@ const Chatbox = ({ onClose }) => {
               bgcolor: "#FFF6E3",
             }}
           >
-            {/* Header */}
             <Box
               sx={{
                 px: 3,
@@ -313,10 +317,13 @@ const Chatbox = ({ onClose }) => {
               }}
             >
               <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-                <Avatar sx={{ bgcolor: "#FFF6E3", color: "#333" }} />
+                <Avatar
+                  src={selectedFriend?.profilePic || undefined}
+                  sx={{ bgcolor: "#FFF6E3", color: "#333" }}
+                />
                 <Typography variant="h6" fontWeight="bold">
                   {selectedFriend
-                    ? `${selectedFriend.firstName} ${
+                    ? `${selectedFriend.firstName || selectedFriend.name} ${
                         selectedFriend.lastName || ""
                       }`
                     : "Select a friend"}
@@ -327,68 +334,72 @@ const Chatbox = ({ onClose }) => {
               </IconButton>
             </Box>
 
-            {/* Messages */}
             <Stack
               spacing={2}
               sx={{ flexGrow: 1, overflowY: "auto", px: 3, py: 2 }}
             >
-              {(chats[selectedFriend?._id] || []).map((msg, idx) => (
-                <Box
-                  key={idx}
-                  sx={{
-                    alignSelf:
-                      msg.senderId === currentUser._id
-                        ? "flex-end"
-                        : "flex-start",
-                    maxWidth: "75%",
-                  }}
-                >
-                  <Box
-                    sx={{
-                      bgcolor:
-                        msg.senderId === currentUser._id
-                          ? "#AFA8F0"
-                          : "#FFD5C2",
-                      px: 2,
-                      py: 1,
-                      borderRadius: "15px",
-                    }}
-                  >
-                    <Typography>{msg.text}</Typography>
-                  </Box>
+              {(chats[selectedFriend?._id || selectedFriend?.id] || []).map(
+                (msg, idx) => {
+                  const realMsg = msg.message || msg; // socket vs history formats
+                  const isMine =
+                    realMsg.senderId === currentUser._id ||
+                    realMsg.sender === currentUser._id;
 
-                  {msg.pin && (
+                  return (
                     <Box
+                      key={idx}
                       sx={{
-                        mt: 1,
-                        bgcolor: "#FC9CE3",
-                        borderRadius: "16px",
-                        overflow: "hidden",
-                        p: 1,
-                        maxWidth: "350px",
-                        cursor: "pointer",
-                      }}
-                      onClick={() => {
-                        setModalPin(msg.pin);
-                        setShowModal(true);
+                        alignSelf: isMine ? "flex-end" : "flex-start",
+                        maxWidth: "75%",
                       }}
                     >
-                      <img
-                        src={msg.pin.image}
-                        alt={msg.pin.title}
-                        style={{ width: "100%", borderRadius: "12px" }}
-                      />
-                      <Typography mt={1} fontWeight="bold">
-                        {msg.pin.title}
-                      </Typography>
+                      {realMsg.text && (
+                        <Box
+                          sx={{
+                            bgcolor: isMine ? "#AFA8F0" : "#FFD5C2",
+                            px: 2,
+                            py: 1,
+                            borderRadius: "15px",
+                          }}
+                        >
+                          <Typography>{realMsg.text}</Typography>
+                        </Box>
+                      )}
+
+                      {realMsg.pin && (
+                        <Box
+                          sx={{
+                            mt: 1,
+                            bgcolor: "#FC9CE3",
+                            borderRadius: "16px",
+                            overflow: "hidden",
+                            p: 1,
+                            maxWidth: "350px",
+                            cursor: "pointer",
+                          }}
+                          onClick={() => {
+                            setModalPin(realMsg.pin);
+                            setShowModal(true);
+                          }}
+                        >
+                          <img
+                            src={realMsg.pin.image}
+                            alt={realMsg.pin.title}
+                            style={{ width: "100%", borderRadius: "12px" }}
+                          />
+                          <Typography mt={1} fontWeight="bold">
+                            {realMsg.pin.title}
+                          </Typography>
+                        </Box>
+                      )}
                     </Box>
-                  )}
-                </Box>
-              ))}
+                  );
+                }
+              )}
+
               <div ref={messagesEndRef} />
             </Stack>
 
-            {/* Input */}
             <Box
               sx={{
                 px: 2,

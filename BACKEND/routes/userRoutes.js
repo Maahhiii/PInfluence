@@ -9,7 +9,8 @@ import {
   rejectFriendRequest,
   removeFriend,
   getUserFriends,
-  getFriendRequests
+  getFriendRequests,
+  getAllUsers,
 } from "../controllers/userController.js";
 import { protect } from "../middleware/authMiddleware.js";
 import { makeUploader } from "../middleware/uploadMiddleware.js";
@@ -33,6 +34,7 @@ router.post("/friends/reject/:id", protect, rejectFriendRequest);
 router.delete("/friends/remove/:id", protect, removeFriend);
 router.get("/friends/:id", protect, getUserFriends);
 router.get("/friend-requests", protect, getFriendRequests);
+router.get("/all", protect, getAllUsers);
 
 // Boards
 router.post("/add-board", protect, addBoardToUser);

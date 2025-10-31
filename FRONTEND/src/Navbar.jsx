@@ -37,7 +37,7 @@ export default function Navbar({
     // Clear storage
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-
+    localStorage.removeItem("sessionStart");
     // Clear state
     if (typeof setUser === "function") {
       setUser(null);
@@ -46,7 +46,7 @@ export default function Navbar({
     }
 
     // Redirect
-    navigate("/login");
+    navigate("/");
   };
 
   const goToSearchPage = () => {

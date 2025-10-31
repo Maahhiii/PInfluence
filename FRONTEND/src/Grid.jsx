@@ -10,48 +10,46 @@ import { Box, Typography, Fade } from "@mui/material";
 import axios from "axios";
 
 function Grid(props) {
-  const { isMale: genderProp, onChatClick } = props;
+  const { isMale: genderProp, onChatClick, user, boards, setBoards } = props;
 
   const [pins, setPins] = useState([]);
   const [visiblePins, setVisiblePins] = useState([]);
   const [selectedPin, setSelectedPin] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState(null);
   const [isMale, setIsMale] = useState(genderProp ?? true);
+
+  // ✅ Update when parent changes gender
+  useEffect(() => {
+    setIsMale(genderProp);
+  }, [genderProp]);
 
   // ✅ NEW: for sharing mode
   const [shareMode, setShareMode] = useState(false);
   const [friends, setFriends] = useState([]);
 
-  /* ✅ Load logged-in user */
-  useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) setUser(JSON.parse(storedUser));
-  }, []);
-
   /* ✅ Fetch friends (actual backend route fix) */
+
   useEffect(() => {
     const fetchFriends = async () => {
-      if (!user?._id) return;
+      const storedUser = JSON.parse(localStorage.getItem("user"));
+      if (!storedUser?._id) return;
+
       try {
         const token = localStorage.getItem("token");
         const res = await axios.get(
-          `http://localhost:5000/api/users/friends/${user._id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
+          `http://localhost:5000/api/users/friends/${storedUser._id}`,
+          { headers: { Authorization: `Bearer ${token}` } }
         );
+
         setFriends(res.data || []);
       } catch (err) {
-        console.error("Error fetching friends:", err);
+        console.error("Failed to fetch friends:", err);
       }
     };
 
     fetchFriends();
-  }, [user]);
+  }, []);
 
   /* ✅ Fetch pins from backend */
   useEffect(() => {
@@ -107,9 +105,6 @@ function Grid(props) {
   };
   const closeModal = () => setIsModalOpen(false);
 
-  /* ✅ Gender toggle */
-  const handleToggleGender = () => setIsMale((prev) => !prev);
-
   /* ✅ NEW: handle share pin */
   const handleSharePin = (pin) => {
     setSelectedPin(pin);
@@ -118,23 +113,28 @@ function Grid(props) {
 
   /* ✅ Send selected pin to chosen friend (corrected to pass full friend object) */
   const sendPinToFriend = (friend) => {
+    if (!selectedPin) return; // make sure a pin is selected
+
     const event = new CustomEvent("send-pin", {
       detail: {
+        friendId: friend._id, // ✅ make sure real id sent
         friend: {
           _id: friend._id,
           name: `${friend.firstName} ${friend.lastName || ""}`,
-          profilePic: friend.profilePic,
+          profilePic: friend.profilePic || friend.avatar,
         },
         pin: {
-          _id: card._id,
-          image: card.image,
-          title: card.title || "Shared Pin",
-          shopLink: card.shopLink || "#",
+          _id: selectedPin._id,
+          image: selectedPin.image,
+          title: selectedPin.title,
+          shopLink: selectedPin.shopLink || "#",
         },
       },
     });
     window.dispatchEvent(event);
-    setShowFriends(false);
+
+    // optionally close the share overlay
+    setShareMode(false);
   };
 
   const breakpointColumnsObj = {
@@ -154,12 +154,12 @@ function Grid(props) {
 
   return (
     <>
-      <Navbar
+      {/* <Navbar
         onToggleGender={handleToggleGender}
         isMale={isMale}
         user={user}
         onChatClick={onChatClick}
-      />
+      /> */}
 
       <div className="grid-wrapper">
         <InfiniteScroll
@@ -195,7 +195,15 @@ function Grid(props) {
           </Masonry>
         </InfiniteScroll>
 
-        <Modal isOpen={isModalOpen} onClose={closeModal} card={selectedPin} />
+        <Modal
+          isOpen={isModalOpen}
+          onClose={closeModal}
+          card={selectedPin}
+          currentUser={user}
+          friends={friends}
+          boards={boards}
+          setBoards={setBoards}
+        />
 
         {/* ✅ Share Overlay */}
         {shareMode && (

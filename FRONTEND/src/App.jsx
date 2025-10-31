@@ -21,6 +21,7 @@ import SignUpForm from "./SignUpPage";
 import "./App.css";
 import { Analytics } from "@vercel/analytics/react";
 import BoardPage from "./BoardPage";
+import socket from "./socket";
 
 /* ---------------------- SCROLL TO TOP ---------------------- */
 function ScrollToTop() {
@@ -57,10 +58,11 @@ function AppWrapper() {
   const navigate = useNavigate();
 
   const [user, setUser] = useState(null);
-  const [isMale, setIsMale] = useState(true);
+  const [isMale, setIsMale] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [loadingUser, setLoadingUser] = useState(true);
+  const [boards, setBoards] = useState([]);
 
   /* ✅ Restore user session on page refresh */
   useEffect(() => {
@@ -93,6 +95,50 @@ function AppWrapper() {
     initUser();
   }, []);
 
+  // ✅ Auto-logout after 30 min (1800000ms)
+  useEffect(() => {
+    const checkSession = () => {
+      const start = localStorage.getItem("sessionStart");
+      if (!start) return;
+
+      const now = Date.now();
+      const diff = now - parseInt(start);
+      const MAX_AGE = 30 * 60 * 1000; // 30 min
+
+      if (diff > MAX_AGE) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        localStorage.removeItem("sessionStart");
+        setUser(null);
+        navigate("/", { replace: true }); // ✅ send to homepage
+      }
+    };
+
+    // Check immediately + every minute
+    checkSession();
+    const interval = setInterval(checkSession, 60000);
+
+    return () => clearInterval(interval);
+  }, [navigate]);
+
+  useEffect(() => {
+    const refreshSession = () => {
+      if (localStorage.getItem("token")) {
+        localStorage.setItem("sessionStart", Date.now());
+      }
+    };
+
+    window.addEventListener("click", refreshSession);
+    window.addEventListener("keydown", refreshSession);
+    window.addEventListener("scroll", refreshSession);
+
+    return () => {
+      window.removeEventListener("click", refreshSession);
+      window.removeEventListener("keydown", refreshSession);
+      window.removeEventListener("scroll", refreshSession);
+    };
+  }, []);
+
   /* ✅ Handle redirect from /login to /grid after successful login */
   useEffect(() => {
     if (user && location.pathname === "/login") {
@@ -102,7 +148,7 @@ function AppWrapper() {
 
   /* Navbar visibility logic */
   const showNavbarHome = ["/", "/login", "/signup"].includes(location.pathname);
-  const hideMainNavbar = ["/search", "/grid"].includes(location.pathname); // optional tweak
+  const hideMainNavbar = ["/search"].includes(location.pathname); // optional tweak
 
   const handleToggleGender = () => setIsMale((prev) => !prev);
   const handleSearch = (query) => {
@@ -159,14 +205,20 @@ function AppWrapper() {
         {/* Public Routes */}
         <Route path="/" element={<Homepage />} />
         <Route path="/login" element={<LoginPage setUser={setUser} />} />
-        <Route path="/signup" element={<SignUpForm />} />
+        <Route path="/signup" element={<SignUpForm setUser={setUser} />} />
 
         {/* Protected Routes */}
         <Route
           path="/grid"
           element={
             <ProtectedRoute user={user} loadingUser={loadingUser}>
-              <Grid isMale={isMale} onChatClick={handleChatClick} user={user} />
+              <Grid
+                isMale={isMale}
+                onChatClick={handleChatClick}
+                user={user}
+                boards={boards}
+                setBoards={setBoards}
+              />
             </ProtectedRoute>
           }
         />

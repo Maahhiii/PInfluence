@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Modal,
   Box,
@@ -17,8 +17,8 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import SendIcon from "@mui/icons-material/Send";
 import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
 import AddIcon from "@mui/icons-material/Add";
-import axios from "axios";
 import Iridescence from "./Iridescence";
+import axios from "axios";
 
 const pastelColors = ["#AFA8F0", "#FC9CE3", "#FFD5C2", "#F9EF9F", "#C6E7FF"];
 
@@ -35,13 +35,18 @@ const modalBackdropStyle = {
   zIndex: 1300,
 };
 
-function CustomModal({ isOpen, onClose, card }) {
+function CustomModal({
+  isOpen,
+  onClose,
+  card = {},
+  currentUser,
+  friends = [],
+}) {
   const [showFriends, setShowFriends] = useState(false);
-  const friendIconsRef = useRef(null);
 
-  // Boards/save-pin UI state
+  // Boards/save-pin UI state (unchanged behavior)
   const [isSavePanelOpen, setIsSavePanelOpen] = useState(false);
-  const [boards, setBoards] = useState(null); // null = loading, [] = none
+  const [boards, setBoards] = useState(null);
   const [loadingBoards, setLoadingBoards] = useState(false);
   const [creatingBoard, setCreatingBoard] = useState(false);
   const [newBoard, setNewBoard] = useState({
@@ -51,134 +56,64 @@ function CustomModal({ isOpen, onClose, card }) {
   });
   const [savingToBoardId, setSavingToBoardId] = useState(null);
 
-  const friends = [
-    { name: "Aanya", avatar: "/profiles/aanya.jpg" },
-    { name: "Meera", avatar: "/profiles/meera.jpg" },
-    { name: "Tanya", avatar: "/profiles/tanya.jpg" },
-  ];
+  // ---- IMPORTANT: Modal no longer calls backend for sending pin.
+  // It dispatches an event `{ friend, pin }` which Chatbox listens to
+  // and does the API + socket work. This prevents double sends.
+
+  const sendToFriend = (friend) => {
+    if (!currentUser || !friend) return;
+
+    const pinPayload = {
+      image: card.image,
+      title: card.title || "Shared Pin",
+      link: card.shopLink || "#",
+      _id: card._id,
+    };
+
+    // Dispatch event that chatbox listens to
+    window.dispatchEvent(
+      new CustomEvent("send-pin", {
+        detail: { friendId: friend._id, friend, pin: pinPayload },
+      })
+    );
+
+    setShowFriends(false);
+    // friendly UX
+    alert(`📌 Pin sent to ${friend.firstName || friend.name || "friend"}`);
+  };
+
+  const handleSaveToBoard = async (boardId) => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.post(
+        `http://localhost:5000/api/boards/${boardId}/add-pin`,
+        { pinId: card._id },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      alert("Pin saved!");
+      setIsSavePanelOpen(false);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to save pin.");
+    }
+  };
 
   useEffect(() => {
-    if (isSavePanelOpen) fetchBoards();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isSavePanelOpen]);
-
-  const fetchBoards = async () => {
-    try {
-      setLoadingBoards(true);
-      const token = localStorage.getItem("token");
-      if (!token) return setBoards([]); // not logged in -> no boards
-      const res = await axios.get("http://localhost:5000/api/boards", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setBoards(res.data || []);
-    } catch (err) {
-      console.error("Error fetching boards:", err);
-      setBoards([]);
-    } finally {
-      setLoadingBoards(false);
-    }
-  };
-
-  const createBoardAPI = async () => {
-    if (!newBoard.name) return alert("Please enter a board name");
-    try {
-      setCreatingBoard(true);
-      const token = localStorage.getItem("token");
-      const fd = new FormData();
-      fd.append("name", newBoard.name);
-      fd.append("description", newBoard.description || "");
-      if (newBoard.cover) fd.append("cover", newBoard.cover);
-
-      const res = await axios.post(
-        "http://localhost:5000/api/boards/create",
-        fd,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-
-      // append to boards list and switch UI to show boards
-      setBoards((prev) => (prev ? [res.data, ...prev] : [res.data]));
-      setNewBoard({ name: "", description: "", cover: null });
-      setCreatingBoard(false);
-      alert("Board created");
-    } catch (err) {
-      console.error("createBoard error:", err);
-      setCreatingBoard(false);
-      alert("Failed to create board");
-    }
-  };
-
-  const addPinToBoardAPI = async (boardId) => {
-    try {
-      setSavingToBoardId(boardId);
-      const token = localStorage.getItem("token");
-      // card should have _id (pin id) — using card._id or card.id
-      const pinId = card._id || card.id;
-      if (!pinId) return alert("Pin id not found");
-
-      const res = await axios.post(
-        `http://localhost:5000/api/boards/${boardId}/add-pin`,
-        { pinId },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      // success - you may notify UI or close
-      setSavingToBoardId(null);
-      setIsSavePanelOpen(false);
-      alert("Pin saved to board!");
-    } catch (err) {
-      console.error("addPinToBoard error:", err);
-      setSavingToBoardId(null);
-      alert("Failed to save pin to board");
-    }
-  };
-
-  const sendToFriend = async (friend) => {
-    if (!currentUser || !friend?._id) return;
-
-    try {
-      // 1️⃣ Save pin message via API
-      const token = localStorage.getItem("token");
-      const res = await axios.post(
-        "http://localhost:5000/api/chat/send",
-        {
-          receiverId: friend._id,
-          text: "Shared a pin with you!",
-          pin: {
-            image: card.image,
-            title: card.title || "Shared Pin",
-            link: card.shopLink || "#",
-          },
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      const savedMsg = res.data;
-
-      // 2️⃣ Emit via socket for real-time
-      socket.emit("send_message", {
-        receiverId: friend._id,
-        message: savedMsg,
-      });
-
-      // Optional: update local chat UI in Chatbox
-      window.dispatchEvent(
-        new CustomEvent("pin-sent", {
-          detail: { friendId: friend._id, message: savedMsg },
-        })
-      );
-
-      setShowFriends(false);
-      alert(`📌 Pin sent to ${friend.name}`);
-    } catch (err) {
-      console.error("📌 Error sending pin:", err);
-      alert("Failed to send pin");
-    }
-  };
+    if (!isOpen) return;
+    const fetchBoards = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const { data } = await axios.get("http://localhost:5000/api/boards", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setBoards(data);
+      } catch (err) {
+        console.error("Failed to load boards", err);
+      }
+    };
+    fetchBoards();
+  }, [isOpen]);
 
   const SparkleHover = React.forwardRef(({ children, ...props }, ref) => (
     <motion.div
@@ -194,7 +129,40 @@ function CustomModal({ isOpen, onClose, card }) {
     </motion.div>
   ));
 
-  if (!isOpen || !card) return null;
+  const handleCreateBoardFromModal = async () => {
+    if (!newBoard.name || !newBoard.cover)
+      return alert("Please enter a name and upload a cover image");
+
+    try {
+      const token = localStorage.getItem("token");
+      const formData = new FormData();
+      formData.append("name", newBoard.name);
+      formData.append("description", newBoard.description || "");
+      formData.append("cover", newBoard.cover);
+
+      const res = await axios.post(
+        "http://localhost:5000/api/boards/create",
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      // ✅ Add new board to UI
+      setBoards((prev) => [...(prev || []), res.data]);
+      setNewBoard({ name: "", description: "", cover: null });
+      setCreatingBoard(false);
+      alert("Board created successfully!");
+    } catch (err) {
+      console.error(err);
+      alert("Error creating board.");
+    }
+  };
+
+  if (!isOpen) return null;
 
   return (
     <Modal open={isOpen} onClose={onClose}>
@@ -203,7 +171,7 @@ function CustomModal({ isOpen, onClose, card }) {
           component={motion.div}
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.4 }}
+          transition={{ duration: 0.35 }}
           sx={{
             position: "relative",
             zIndex: 1,
@@ -216,10 +184,9 @@ function CustomModal({ isOpen, onClose, card }) {
             p: { xs: 2, sm: 3 },
             boxShadow: "0 10px 25px rgba(0, 0, 0, 0.2)",
             backdropFilter: "blur(10px)",
-            border: "1px solid rgba(255, 255, 255, 0.2)",
+            border: "1px solid rgba(255, 255, 255, 0.15)",
           }}
         >
-          {/* Iridescence */}
           <Box
             sx={{
               position: "absolute",
@@ -231,19 +198,17 @@ function CustomModal({ isOpen, onClose, card }) {
             <Iridescence
               color={[255 / 255, 213 / 255, 194 / 255]}
               mouseReact={false}
-              amplitude={0.1}
-              speed={1.0}
+              amplitude={0.08}
+              speed={1}
             />
           </Box>
 
-          {/* Close */}
           <Box display="flex" justifyContent="flex-end">
             <IconButton onClick={onClose} sx={{ color: "white" }}>
               <CloseIcon />
             </IconButton>
           </Box>
 
-          {/* Image & buttons */}
           <Box
             display="flex"
             justifyContent="center"
@@ -251,8 +216,8 @@ function CustomModal({ isOpen, onClose, card }) {
             flexDirection="column"
           >
             <img
-              src={card.image}
-              alt="Pin"
+              src={card.image || "/placeholder.png"}
+              alt={card.title || "Pin"}
               style={{
                 maxHeight: "70vh",
                 width: "100%",
@@ -272,21 +237,7 @@ function CustomModal({ isOpen, onClose, card }) {
               flexWrap="wrap"
               rowGap={2}
             >
-              {/* Save Pin */}
-              <Tooltip
-                title="Add to your board 💖"
-                arrow
-                placement="top"
-                componentsProps={{
-                  tooltip: {
-                    sx: {
-                      bgcolor: pastelColors[1],
-                      color: "black",
-                      fontWeight: 500,
-                    },
-                  },
-                }}
-              >
+              <Tooltip title="Add to your board" arrow>
                 <SparkleHover>
                   <Button
                     variant="contained"
@@ -296,7 +247,7 @@ function CustomModal({ isOpen, onClose, card }) {
                       "&:hover": { backgroundColor: "#e68dcf" },
                       borderRadius: "999px",
                       fontWeight: "bold",
-                      boxShadow: "0 4px 10px rgba(0, 0, 0, 0.1)",
+                      boxShadow: "0 4px 10px rgba(0,0,0,0.08)",
                     }}
                     onClick={() => setIsSavePanelOpen((s) => !s)}
                   >
@@ -305,21 +256,7 @@ function CustomModal({ isOpen, onClose, card }) {
                 </SparkleHover>
               </Tooltip>
 
-              {/* Send Button Section */}
-              <Tooltip
-                title="Send this pin to a friend 💌"
-                arrow
-                placement="top"
-                componentsProps={{
-                  tooltip: {
-                    sx: {
-                      bgcolor: pastelColors[0],
-                      color: "black",
-                      fontWeight: 500,
-                    },
-                  },
-                }}
-              >
+              <Tooltip title="Send this pin to a friend" arrow>
                 <SparkleHover>
                   <Button
                     variant="contained"
@@ -330,7 +267,7 @@ function CustomModal({ isOpen, onClose, card }) {
                       "&:hover": { backgroundColor: "#9790e2" },
                       borderRadius: "999px",
                       fontWeight: "bold",
-                      boxShadow: "0 4px 10px rgba(0, 0, 0, 0.1)",
+                      boxShadow: "0 4px 10px rgba(0,0,0,0.08)",
                     }}
                   >
                     Send
@@ -338,35 +275,21 @@ function CustomModal({ isOpen, onClose, card }) {
                 </SparkleHover>
               </Tooltip>
 
-              {/* Shop */}
-              <Tooltip
-                title="Shop this look 🛍️"
-                arrow
-                placement="top"
-                componentsProps={{
-                  tooltip: {
-                    sx: {
-                      bgcolor: pastelColors[2],
-                      color: "black",
-                      fontWeight: 500,
-                    },
-                  },
-                }}
-              >
+              <Tooltip title="Shop this look" arrow>
                 <SparkleHover>
                   <Button
                     variant="contained"
                     startIcon={<ShoppingBagIcon />}
                     component="a"
-                    href={card.shopLink}
+                    href={card.shopLink || "#"}
                     target="_blank"
-                    rel="noopener noreferrer"
+                    rel="noreferrer"
                     sx={{
                       backgroundColor: pastelColors[2],
                       "&:hover": { backgroundColor: "#e6c0b0" },
                       borderRadius: "999px",
                       fontWeight: "bold",
-                      boxShadow: "0 4px 10px rgba(0, 0, 0, 0.1)",
+                      boxShadow: "0 4px 10px rgba(0,0,0,0.08)",
                     }}
                   >
                     Shop
@@ -375,7 +298,7 @@ function CustomModal({ isOpen, onClose, card }) {
               </Tooltip>
             </Stack>
 
-            {/* Save Panel (shows when Save Pin clicked) */}
+            {/* Save panel (unchanged) */}
             {isSavePanelOpen && (
               <Box
                 sx={{
@@ -387,8 +310,6 @@ function CustomModal({ isOpen, onClose, card }) {
                     "linear-gradient(135deg, rgba(175,168,240,0.12), rgba(252,156,227,0.12))",
                   borderRadius: 2,
                   p: 2,
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  boxShadow: "0 8px 30px rgba(0,0,0,0.25)",
                 }}
               >
                 <Typography
@@ -398,112 +319,96 @@ function CustomModal({ isOpen, onClose, card }) {
                   Save this Pin to:
                 </Typography>
 
-                {/* Loading state */}
                 {loadingBoards ? (
                   <Box
                     sx={{ display: "flex", justifyContent: "center", py: 2 }}
                   >
                     <CircularProgress size={28} />
                   </Box>
-                ) : (
-                  <>
-                    {/* If user has boards */}
-                    {boards && boards.length > 0 ? (
-                      <Stack direction="row" spacing={2} flexWrap="wrap">
-                        {boards.map((b) => (
-                          <Box
-                            key={b._id}
-                            sx={{
-                              minWidth: 160,
-                              borderRadius: 2,
-                              p: 1,
-                              background: "rgba(255,255,255,0.06)",
-                              cursor: "pointer",
-                              display: "flex",
-                              flexDirection: "column",
-                              alignItems: "center",
-                            }}
-                          >
-                            <img
-                              src={
-                                b.coverImage
-                                  ? `http://localhost:5000${b.coverImage}`
-                                  : card.image || "/placeholder.png"
-                              }
-                              alt={b.name}
-                              style={{
-                                width: "100%",
-                                height: 100,
-                                objectFit: "cover",
-                                borderRadius: 8,
-                                marginBottom: 8,
-                              }}
-                            />
-                            <Typography
-                              sx={{ color: "#fff", fontWeight: 600, mb: 1 }}
-                            >
-                              {b.name}
-                            </Typography>
-
-                            <Button
-                              size="small"
-                              variant="contained"
-                              sx={{
-                                borderRadius: "20px",
-                                textTransform: "none",
-                              }}
-                              onClick={() => addPinToBoardAPI(b._id)}
-                              disabled={savingToBoardId === b._id}
-                            >
-                              {savingToBoardId === b._id
-                                ? "Saving..."
-                                : "Save here"}
-                            </Button>
-                          </Box>
-                        ))}
-                        {/* Add board shortcut */}
-                        <Box
-                          sx={{
-                            minWidth: 160,
-                            borderRadius: 2,
-                            p: 2,
-                            background: "rgba(255,255,255,0.03)",
-                            display: "flex",
-                            flexDirection: "column",
-                            alignItems: "center",
-                            justifyContent: "center",
+                ) : boards && boards.length > 0 ? (
+                  <Stack direction="row" spacing={2} flexWrap="wrap">
+                    {boards.map((b) => (
+                      <Box
+                        key={b._id}
+                        sx={{
+                          minWidth: 160,
+                          borderRadius: 2,
+                          p: 1,
+                          background: "rgba(255,255,255,0.06)",
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                        }}
+                      >
+                        <img
+                          src={
+                            b.coverImage
+                              ? `http://localhost:5000${b.coverImage}`
+                              : card.image || "/placeholder.png"
+                          }
+                          alt={b.name}
+                          style={{
+                            width: "100%",
+                            height: 100,
+                            objectFit: "cover",
+                            borderRadius: 8,
+                            marginBottom: 8,
                           }}
+                        />
+                        <Typography
+                          sx={{ color: "#fff", fontWeight: 600, mb: 1 }}
                         >
-                          <Button
-                            startIcon={<AddIcon />}
-                            variant="outlined"
-                            onClick={() => setCreatingBoard((s) => !s)}
-                            sx={{ borderRadius: "999px", color: "#fff" }}
-                          >
-                            Create Board
-                          </Button>
-                        </Box>
-                      </Stack>
-                    ) : (
-                      // No boards -> prompt to create
-                      <Box sx={{ py: 2 }}>
-                        <Typography sx={{ color: "#fff", mb: 1 }}>
-                          You don't have any boards yet.
+                          {b.name}
                         </Typography>
                         <Button
+                          size="small"
                           variant="contained"
-                          startIcon={<AddIcon />}
-                          onClick={() => setCreatingBoard(true)}
-                          sx={{ borderRadius: "999px" }}
+                          sx={{ borderRadius: "20px", textTransform: "none" }}
+                          onClick={() => handleSaveToBoard(b._id)} // <-- You should wire real save
                         >
-                          Create your first board
+                          Save here
                         </Button>
                       </Box>
-                    )}
-                  </>
+                    ))}
+
+                    {/* ➕ Always show Add Board card */}
+                    <Box
+                      onClick={() => setCreatingBoard(true)}
+                      sx={{
+                        minWidth: 160,
+                        height: 150,
+                        borderRadius: 2,
+                        background: "rgba(255,255,255,0.1)",
+                        border: "2px dashed rgba(255,255,255,0.3)",
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <AddIcon sx={{ fontSize: 30, color: "#fff" }} />
+                      <Typography sx={{ color: "#fff", mt: 1 }}>
+                        Create Board
+                      </Typography>
+                    </Box>
+                  </Stack>
+                ) : (
+                  <Box sx={{ py: 2 }}>
+                    <Typography sx={{ color: "#fff", mb: 1 }}>
+                      You don't have any boards yet.
+                    </Typography>
+                    <Button
+                      variant="contained"
+                      startIcon={<AddIcon />}
+                      onClick={() => setCreatingBoard(true)}
+                      sx={{ borderRadius: "999px" }}
+                    >
+                      Create your first board
+                    </Button>
+                  </Box>
                 )}
 
-                {/* Create board inline */}
                 {creatingBoard && (
                   <Box
                     sx={{
@@ -543,7 +448,7 @@ function CustomModal({ isOpen, onClose, card }) {
                     </Button>
                     <Button
                       variant="contained"
-                      onClick={createBoardAPI}
+                      onClick={handleCreateBoardFromModal}
                       disabled={!newBoard.name}
                       sx={{ borderRadius: "999px" }}
                     >
@@ -554,7 +459,6 @@ function CustomModal({ isOpen, onClose, card }) {
               </Box>
             )}
 
-            {/* Friend list section */}
             {showFriends && (
               <Box
                 mt={5}
@@ -575,43 +479,62 @@ function CustomModal({ isOpen, onClose, card }) {
                 >
                   Send this pin to:
                 </Typography>
-                <Stack
-                  direction="row"
-                  spacing={2}
-                  justifyContent="center"
-                  flexWrap="wrap"
-                >
-                  {friends.map((friend) => (
-                    <Box
-                      key={friend._id}
-                      onClick={() => sendToFriend(friend)}
-                      sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        cursor: "pointer",
-                        p: 1.5,
-                        borderRadius: "12px",
-                        transition: "all 0.3s ease",
-                        "&:hover": {
-                          backgroundColor: "rgba(255,255,255,0.15)",
-                          transform: "scale(1.05)",
-                        },
-                      }}
-                    >
-                      <Avatar
-                        src={friend.avatar}
-                        sx={{ width: 56, height: 56 }}
-                      />
-                      <Typography
-                        mt={1}
-                        sx={{ color: "#fff", fontWeight: 500 }}
+
+                {friends === undefined ? (
+                  <Typography sx={{ color: "#fff", textAlign: "center" }}>
+                    Loading friends...
+                  </Typography>
+                ) : friends.length === 0 ? (
+                  <Typography sx={{ color: "#fff", textAlign: "center" }}>
+                    No friends found 😢
+                  </Typography>
+                ) : (
+                  <Stack
+                    direction="row"
+                    spacing={2}
+                    justifyContent="center"
+                    flexWrap="wrap"
+                  >
+                    {friends.map((friend) => (
+                      <Box
+                        key={friend._id || friend.id}
+                        onClick={() => sendToFriend(friend)}
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          cursor: "pointer",
+                          p: 1.5,
+                          borderRadius: "12px",
+                          transition: "all 0.3s ease",
+                          "&:hover": {
+                            backgroundColor: "rgba(255,255,255,0.15)",
+                            transform: "scale(1.05)",
+                          },
+                        }}
                       >
-                        {friend.firstName} {friend.lastName || ""}
-                      </Typography>
-                    </Box>
-                  ))}
-                </Stack>
+                        <Avatar
+                          src={friend.profilePic || undefined}
+                          sx={{
+                            width: 56,
+                            height: 56,
+                            bgcolor: "#fff6e3",
+                            color: "#333",
+                          }}
+                        >
+                          {friend.firstName?.[0] || friend.name?.[0] || "?"}
+                        </Avatar>
+                        <Typography
+                          mt={1}
+                          sx={{ color: "#fff", fontWeight: 500 }}
+                        >
+                          {friend.firstName || friend.name}{" "}
+                          {friend.lastName || ""}
+                        </Typography>
+                      </Box>
+                    ))}
+                  </Stack>
+                )}
               </Box>
             )}
           </Box>

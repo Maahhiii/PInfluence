@@ -34,6 +34,9 @@ const ProfilePage = () => {
     description: "",
     cover: null,
   });
+  const [allUsers, setAllUsers] = useState([]);
+  const [friendRequests, setFriendRequests] = useState([]);
+  const [sentRequests, setSentRequests] = useState([]);
 
   const navigate = useNavigate();
 
@@ -49,6 +52,27 @@ const ProfilePage = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
         setUser(res.data);
+
+        // Get all users
+        const usersRes = await axios.get(
+          "http://localhost:5000/api/users/all",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        setAllUsers(usersRes.data);
+
+        // Incoming friend requests
+        const frRes = await axios.get(
+          "http://localhost:5000/api/users/friend-requests",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        setFriendRequests(frRes.data);
+
+        // Sent requests (already in user data)
+        setSentRequests(res.data.sentRequests || []);
 
         // 2️⃣ Get friends count
         try {
@@ -84,7 +108,7 @@ const ProfilePage = () => {
   const handleLogout = () => {
     if (window.confirm("Are you sure you want to log out?")) {
       localStorage.removeItem("token");
-      navigate("/login");
+      navigate("/");
     }
   };
 
@@ -138,6 +162,47 @@ const ProfilePage = () => {
       console.error(err);
       alert("Failed to update profile.");
     }
+  };
+
+  const handleSendRequest = async (id) => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.post(
+        `http://localhost:5000/api/users/friends/request/${id}`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      alert("Friend request sent");
+      setSentRequests([...sentRequests, id]);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleAccept = async (id) => {
+    const token = localStorage.getItem("token");
+    await axios.post(
+      `http://localhost:5000/api/users/friends/accept/${id}`,
+      {},
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    setFriendRequests(friendRequests.filter((u) => u._id !== id));
+  };
+
+  const handleReject = async (id) => {
+    const token = localStorage.getItem("token");
+    await axios.post(
+      `http://localhost:5000/api/users/friends/reject/${id}`,
+      {},
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    setFriendRequests(friendRequests.filter((u) => u._id !== id));
   };
 
   // ✅ Add new board
@@ -502,6 +567,123 @@ const ProfilePage = () => {
           </Button>
         </Box>
       </Modal>
+      {/* 🔥 Friends & Requests Section */}
+      <Box sx={{ px: { xs: 2, md: 4 }, py: 4 }}>
+        <Typography variant="h6" color="#FC9CE3" fontWeight={600} mb={2}>
+          People You May Know
+        </Typography>
+
+        {allUsers.map((u) => {
+          const alreadySent = sentRequests.includes(u._id);
+          const alreadyFriend = user.friends.includes(u._id);
+
+          return (
+            <Box
+              key={u._id}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                mb: 2,
+                p: 2,
+                borderRadius: "16px",
+                background: "rgba(252,156,227,0.12)",
+              }}
+            >
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                <Avatar
+                  src={
+                    u.profilePic
+                      ? `http://localhost:5000${u.profilePic}`
+                      : "/profile/avatar.png"
+                  }
+                />
+                <Typography fontWeight={600}>
+                  {u.firstName} {u.lastName}
+                </Typography>
+              </Box>
+
+              {alreadyFriend ? (
+                <Typography
+                  fontSize={14}
+                  sx={{ color: "#AFA8F0", fontWeight: 600 }}
+                >
+                  Friends
+                </Typography>
+              ) : alreadySent ? (
+                <Typography fontSize={14} sx={{ color: "#999" }}>
+                  Request Sent
+                </Typography>
+              ) : (
+                <Button
+                  variant="contained"
+                  sx={{
+                    bgcolor: "#FC9CE3",
+                    borderRadius: "20px",
+                    color: "#1E1E1E",
+                  }}
+                  onClick={() => handleSendRequest(u._id)}
+                >
+                  Follow
+                </Button>
+              )}
+            </Box>
+          );
+        })}
+
+        {/* 📥 Received Requests */}
+        <Typography variant="h6" color="#AFA8F0" fontWeight={600} mt={4} mb={2}>
+          Friend Requests
+        </Typography>
+
+        {friendRequests.length === 0 && (
+          <Typography sx={{ color: "#777" }}>No pending requests</Typography>
+        )}
+
+        {friendRequests.map((u) => (
+          <Box
+            key={u._id}
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              p: 2,
+              mb: 2,
+              borderRadius: "16px",
+              background: "rgba(175,168,240,0.12)",
+            }}
+          >
+            <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+              <Avatar
+                src={
+                  u.profilePic
+                    ? `http://localhost:5000${u.profilePic}`
+                    : "/profile/avatar.png"
+                }
+              />
+              <Typography>
+                {u.firstName} {u.lastName}
+              </Typography>
+            </Box>
+            <Box sx={{ display: "flex", gap: 1 }}>
+              <Button
+                size="small"
+                sx={{ bgcolor: "#AFA8F0", color: "white" }}
+                onClick={() => handleAccept(u._id)}
+              >
+                Accept
+              </Button>
+              <Button
+                size="small"
+                sx={{ bgcolor: "#FF8FA3", color: "white" }}
+                onClick={() => handleReject(u._id)}
+              >
+                Reject
+              </Button>
+            </Box>
+          </Box>
+        ))}
+      </Box>
     </Box>
   );
 };
