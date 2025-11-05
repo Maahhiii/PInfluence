@@ -14,7 +14,6 @@ const userSchema = new mongoose.Schema(
     boards: [{ type: mongoose.Schema.Types.ObjectId, ref: "Board" }],
     pins: [{ type: mongoose.Schema.Types.ObjectId, ref: "Pin" }],
 
-    // ✅ Mutual Friends System
     friends: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     friendRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }], // incoming
     sentRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],   // outgoing
@@ -22,7 +21,6 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// 🔐 Password encryption
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
   const salt = await bcrypt.genSalt(10);

@@ -21,7 +21,6 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const server = http.createServer(app);
 
-// ✅ socket.io setup
 const io = new IOServer(server, {
   cors: {
     origin: process.env.CLIENT_URL || "http://localhost:5173",
@@ -39,15 +38,12 @@ app.use(
   })
 );
 
-// ✅ Serve static images correctly
 app.use("/clothes_men", express.static(path.join(__dirname, "public/clothes_men")));
 app.use("/clothes_women", express.static(path.join(__dirname, "public/clothes_women")));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// ✅ Connect DB
 connectDB();
 
-// ✅ Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/pins", pinRoutes);
@@ -56,7 +52,6 @@ app.use("/api/chat", chatRoutes);
 
 app.get("/", (req, res) => res.send("🟢 Pinfluence API running successfully!"));
 
-// ✅ socket.io handlers
 io.on("connection", (socket) => {
   console.log("🔌 User connected:", socket.id);
 

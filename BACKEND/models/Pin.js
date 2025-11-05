@@ -4,7 +4,7 @@ const pinSchema = new mongoose.Schema(
   {
     title: { type: String, required: true },
     description: { type: String },
-    image: { type: String, required: true }, // path (e.g. /uploads/pins/...)
+    image: { type: String, required: true }, 
     shopLink: { type: String },
     tags: [{ type: String }],
     category: { type: String, enum: ["men", "women", "unisex"], default: "unisex" },

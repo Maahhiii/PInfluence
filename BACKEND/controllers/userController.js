@@ -56,7 +56,6 @@ export const uploadProfilePic = async (req, res) => {
   }
 };
 
-// ✅ Send Friend Request
 export const sendFriendRequest = async (req, res) => {
   try {
     const targetId = req.params.id;
@@ -77,7 +76,6 @@ export const sendFriendRequest = async (req, res) => {
       return res.status(400).json({ message: "Request already sent" });
     }
 
-    // Add to outgoing and incoming lists
     user.sentRequests.push(targetId);
     target.friendRequests.push(user._id);
 
@@ -91,10 +89,9 @@ export const sendFriendRequest = async (req, res) => {
   }
 };
 
-// ✅ Accept Friend Request
 export const acceptFriendRequest = async (req, res) => {
   try {
-    const senderId = req.params.id; // who sent the request
+    const senderId = req.params.id; 
     const user = await User.findById(req.user._id);
     const sender = await User.findById(senderId);
 
@@ -106,7 +103,6 @@ export const acceptFriendRequest = async (req, res) => {
         .json({ message: "No friend request from this user" });
     }
 
-    // Remove from pending
     user.friendRequests = user.friendRequests.filter(
       (id) => id.toString() !== senderId
     );
@@ -114,7 +110,6 @@ export const acceptFriendRequest = async (req, res) => {
       (id) => id.toString() !== req.user._id.toString()
     );
 
-    // Add to mutual friends
     user.friends.push(senderId);
     sender.friends.push(user._id);
 
@@ -128,7 +123,6 @@ export const acceptFriendRequest = async (req, res) => {
   }
 };
 
-// ✅ Reject Friend Request
 export const rejectFriendRequest = async (req, res) => {
   try {
     const senderId = req.params.id;
@@ -154,7 +148,6 @@ export const rejectFriendRequest = async (req, res) => {
   }
 };
 
-// ✅ Remove Friend
 export const removeFriend = async (req, res) => {
   try {
     const friendId = req.params.id;
@@ -178,7 +171,6 @@ export const removeFriend = async (req, res) => {
   }
 };
 
-// ✅ Get All Friends
 export const getUserFriends = async (req, res) => {
   try {
     const userId =
@@ -198,8 +190,6 @@ export const getUserFriends = async (req, res) => {
   }
 };
 
-
-// ✅ Get Pending Friend Requests
 export const getFriendRequests = async (req, res) => {
   try {
     const user = await User.findById(req.user._id).populate(
@@ -230,7 +220,6 @@ export const addBoardToUser = async (req, res) => {
   }
 };
 
-// ✅ Get all users (excluding self)
 export const getAllUsers = async (req, res) => {
   try {
     const users = await User.find({ _id: { $ne: req.user._id } })

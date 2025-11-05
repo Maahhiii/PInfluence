@@ -19,6 +19,22 @@ function Grid(props) {
   const [loading, setLoading] = useState(true);
   const [isMale, setIsMale] = useState(genderProp ?? true);
 
+  // ✅ If SearchPage sent specific cards, use them instead of fetching all pins
+  useEffect(() => {
+    if (props.cards && props.cards.length > 0) {
+      const normalized = props.cards.map((pin) => ({
+        ...pin,
+        image: pin.image.startsWith("http")
+          ? pin.image
+          : `http://localhost:5000${pin.image}`,
+      }));
+
+      setPins(normalized);
+      setVisiblePins(normalized);
+      setLoading(false);
+    }
+  }, [props.cards]);
+
   // ✅ Update when parent changes gender
   useEffect(() => {
     setIsMale(genderProp);
@@ -37,6 +53,11 @@ function Grid(props) {
 
       try {
         const token = localStorage.getItem("token");
+        if (!token) {
+          console.warn("No token, skipping friends fetch");
+          return;
+        }
+
         const res = await axios.get(
           `http://localhost:5000/api/users/friends/${storedUser._id}`,
           { headers: { Authorization: `Bearer ${token}` } }
@@ -53,6 +74,7 @@ function Grid(props) {
 
   /* ✅ Fetch pins from backend */
   useEffect(() => {
+    if (props.cards && props.cards.length > 0) return;
     const fetchPins = async () => {
       try {
         const { data } = await axios.get("http://localhost:5000/api/pins");
@@ -73,14 +95,30 @@ function Grid(props) {
   }, []);
 
   /* ✅ Filter by gender */
+  /* ✅ Filter by gender */
   useEffect(() => {
     if (pins.length > 0) {
       const category = isMale ? "men" : "women";
-      const filtered = pins.filter(
-        (p) =>
-          p.category?.toLowerCase() === category ||
-          p.category?.toLowerCase() === "unisex"
-      );
+
+      const filtered = pins.filter((p) => {
+        const cat = p.category?.toLowerCase().trim();
+
+        if (!cat) return false; // no category? skip
+
+        // valid male categories
+        const maleCats = ["men", "male", "mens", "menswear", "unisex"];
+        const femaleCats = [
+          "women",
+          "female",
+          "womens",
+          "girls",
+          "girlswear",
+          "unisex",
+        ];
+
+        return isMale ? maleCats.includes(cat) : femaleCats.includes(cat);
+      });
+
       setVisiblePins(filtered);
     }
   }, [pins, isMale]);

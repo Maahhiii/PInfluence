@@ -13,12 +13,16 @@ import "./SearchPage.css";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import TiltedCard from "./TiltedCard";
-import clothesWomen from "./data/clothesWomen";
-import clothesMen from "./data/clothesMen";
 import { Home } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
-const SearchPage = ({ searchTerm: initialSearchTerm = "", isMale }) => {
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+
+const SearchPage = ({ searchTerm: initialSearchTerm = "" }) => {
+  const [isMale, setIsMale] = useState(
+    localStorage.getItem("isMale") === "true"
+  );
   const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
   const [searchResults, setSearchResults] = useState([]);
   const [showCarousel, setShowCarousel] = useState(true);
@@ -47,24 +51,45 @@ const SearchPage = ({ searchTerm: initialSearchTerm = "", isMale }) => {
     }
   }, [initialSearchTerm]);
 
-  const handleSearch = (term = searchTerm) => {
-    const data = isMale ? clothesMen : clothesWomen;
+  const handleSearch = async (term = searchTerm) => {
+    try {
+      const cleanedTerm = term.trim();
 
-    const filtered = data.filter((card) =>
-      card.title.toLowerCase().includes(term.toLowerCase())
-    );
+      if (!cleanedTerm) {
+        const res = await axios.get(`${API_BASE}/pins/search`, {
+          params: { category: isMale ? "men" : "women" },
+        });
+        setSearchResults(res.data);
+        setShowCarousel(false);
+        return;
+      }
 
-    setSearchResults(filtered);
-    setShowCarousel(false);
+      setShowCarousel(false);
+      console.log("SEARCH REQUEST =>", {
+        query: cleanedTerm,
+        category: isMale ? "men" : "women",
+      });
 
-    const cleanedTerm = term.trim();
-    if (cleanedTerm && !searchHistory.includes(cleanedTerm.toLowerCase())) {
-      setSearchHistory((prev) => [
-        ...prev
-          .filter((t) => t.toLowerCase() !== cleanedTerm.toLowerCase())
-          .slice(-4),
-        cleanedTerm,
-      ]);
+      const res = await axios.get(`${API_BASE}/pins/search`, {
+        params: {
+          query: cleanedTerm,
+          category: isMale ? "men" : "women",
+        },
+      });
+
+      setSearchResults(Array.isArray(res.data) ? res.data : []);
+
+      // ✅ maintain history
+      if (cleanedTerm && !searchHistory.includes(cleanedTerm.toLowerCase())) {
+        setSearchHistory((prev) => [
+          ...prev
+            .filter((t) => t.toLowerCase() !== cleanedTerm.toLowerCase())
+            .slice(-4),
+          cleanedTerm,
+        ]);
+      }
+    } catch (err) {
+      console.error("Search error:", err);
     }
   };
 
@@ -107,7 +132,7 @@ const SearchPage = ({ searchTerm: initialSearchTerm = "", isMale }) => {
         minHeight: "100vh",
         bgcolor: "#FFF6E3",
         color: "#1E1E1E",
-        overflowX: "hidden", 
+        overflowX: "hidden",
         px: { xs: 1.5, md: 3 },
       }}
     >
@@ -227,7 +252,7 @@ const SearchPage = ({ searchTerm: initialSearchTerm = "", isMale }) => {
             display: "flex",
             justifyContent: "center",
             px: { xs: 2, md: 4 },
-            pb: 6, 
+            pb: 6,
           }}
         >
           <Slider {...settings} style={{ width: "100%" }}>

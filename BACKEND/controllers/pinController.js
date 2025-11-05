@@ -4,8 +4,16 @@ import Board from "../models/Board.js";
 
 export const createPin = async (req, res) => {
   try {
-    const { title, description, shopLink, tags = [], category = "unisex", boardId } = req.body;
-    if (!req.file) return res.status(400).json({ message: "Pin image required" });
+    const {
+      title,
+      description,
+      shopLink,
+      tags = [],
+      category = "unisex",
+      boardId,
+    } = req.body;
+    if (!req.file)
+      return res.status(400).json({ message: "Pin image required" });
 
     const imagePath = `/uploads/pins/${req.file.filename}`;
     const pin = await Pin.create({
@@ -13,17 +21,20 @@ export const createPin = async (req, res) => {
       description,
       image: imagePath,
       shopLink,
-      tags: Array.isArray(tags) ? tags : tags.split(",").map((t) => t.trim()).filter(Boolean),
+      tags: Array.isArray(tags)
+        ? tags
+        : tags
+            .split(",")
+            .map((t) => t.trim())
+            .filter(Boolean),
       category,
-      createdBy: req.user._id
+      createdBy: req.user._id,
     });
 
-    // add to user's pins
     const user = await User.findById(req.user._id);
     user.pins.push(pin._id);
     await user.save();
 
-    // optionally add to a board
     if (boardId) {
       const board = await Board.findById(boardId);
       if (board) {
@@ -41,7 +52,9 @@ export const createPin = async (req, res) => {
 
 export const getPins = async (req, res) => {
   try {
-    const pins = await Pin.find().sort({ createdAt: -1 }).populate("createdBy", "firstName lastName profilePic");
+    const pins = await Pin.find()
+      .sort({ createdAt: -1 })
+      .populate("createdBy", "firstName lastName profilePic");
     res.json(pins);
   } catch (err) {
     console.error("getPins error:", err);
@@ -51,7 +64,10 @@ export const getPins = async (req, res) => {
 
 export const getPinById = async (req, res) => {
   try {
-    const pin = await Pin.findById(req.params.id).populate("createdBy", "firstName lastName profilePic");
+    const pin = await Pin.findById(req.params.id).populate(
+      "createdBy",
+      "firstName lastName profilePic"
+    );
     if (!pin) return res.status(404).json({ message: "Pin not found" });
     res.json(pin);
   } catch (err) {
@@ -64,11 +80,11 @@ export const deletePin = async (req, res) => {
   try {
     const pin = await Pin.findById(req.params.id);
     if (!pin) return res.status(404).json({ message: "Pin not found" });
-    if (pin.createdBy.toString() !== req.user._id.toString()) return res.status(403).json({ message: "Not authorized" });
+    if (pin.createdBy.toString() !== req.user._id.toString())
+      return res.status(403).json({ message: "Not authorized" });
 
     await Pin.findByIdAndDelete(req.params.id);
 
-    // remove from user.pins and any boards
     await User.findByIdAndUpdate(req.user._id, { $pull: { pins: pin._id } });
     await Board.updateMany({ pins: pin._id }, { $pull: { pins: pin._id } });
 
@@ -78,18 +94,37 @@ export const deletePin = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-
 export const searchPins = async (req, res) => {
   try {
-    const q = req.query.query || "";
+    const q = req.query.query?.trim() || "";
+    const category = req.query.category?.toLowerCase();
     const regex = new RegExp(q, "i");
-    // search tags or title or description
+
+    let genderFilter = {};
+    if (category === "men") {
+      genderFilter = {
+        category: { $in: ["men", "male", "mens", "menswear", "unisex"] },
+      };
+    } else if (category === "women") {
+      genderFilter = {
+        category: {
+          $in: ["women", "female", "womens", "girls", "girlswear", "unisex"],
+        },
+      };
+    }
+
     const pins = await Pin.find({
-      $or: [{ title: regex }, { description: regex }, { tags: regex }]
+      ...genderFilter,
+      $or: [
+        { title: regex },
+        { description: regex },
+        { tags: { $in: [regex] } },
+      ],
     }).sort({ createdAt: -1 });
+
     res.json(pins);
   } catch (err) {
     console.error("searchPins error:", err);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ error: "Search failed", details: err.message });
   }
 };

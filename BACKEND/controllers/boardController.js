@@ -1,6 +1,5 @@
 import Board from "../models/Board.js";
 import User from "../models/User.js";
-import Pin from "../models/Pin.js";
 
 export const createBoard = async (req, res) => {
   try {
@@ -48,7 +47,6 @@ export const addPinToBoard = async (req, res) => {
       await board.save();
     }
 
-    // Optionally populate pins before sending
     await board.populate({
       path: "pins",
       populate: { path: "createdBy", select: "firstName lastName profilePic" }
@@ -61,7 +59,6 @@ export const addPinToBoard = async (req, res) => {
   }
 };
 
-// NEW: remove pin from board
 export const removePinFromBoard = async (req, res) => {
   try {
     const { boardId } = req.params;
@@ -73,7 +70,6 @@ export const removePinFromBoard = async (req, res) => {
     board.pins = board.pins.filter((p) => p.toString() !== pinId.toString());
     await board.save();
 
-    // Optionally populate
     await board.populate({
       path: "pins",
       populate: { path: "createdBy", select: "firstName lastName profilePic" }

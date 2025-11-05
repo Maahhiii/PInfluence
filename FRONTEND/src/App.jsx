@@ -150,7 +150,13 @@ function AppWrapper() {
   const showNavbarHome = ["/", "/login", "/signup"].includes(location.pathname);
   const hideMainNavbar = ["/search"].includes(location.pathname); // optional tweak
 
-  const handleToggleGender = () => setIsMale((prev) => !prev);
+  // const handleToggleGender = () => setIsMale((prev) => !prev);
+  const handleToggleGender = () => {
+    const newVal = !isMale;
+    setIsMale(newVal);
+    localStorage.setItem("isMale", newVal ? "true" : "false");
+  };
+
   const handleSearch = (query) => {
     setSearchQuery(query);
     navigate("/search");

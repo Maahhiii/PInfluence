@@ -1,6 +1,5 @@
 import Message from "../models/Message.js";
 
-// ✅ Send a message (text or pin)
 export const sendMessage = async (req, res) => {
   try {
     const { receiverId, text, pin } = req.body;
@@ -19,10 +18,9 @@ export const sendMessage = async (req, res) => {
   }
 };
 
-// ✅ Fetch chat history between two users
 export const getMessages = async (req, res) => {
   try {
-    const { userId } = req.params; // friend’s ID
+    const { userId } = req.params; 
     const myId = req.user._id;
 
     const messages = await Message.find({
